@@ -1,0 +1,22 @@
+/* Shared form opening (2026-09-28): every form opens like gift-form.html —
+   one gold Jost eyebrow line, then the Cormorant Garamond (EN) / Amiri (AR)
+   title. Linked after each form's inline <style>, element-qualified so it
+   wins over the older per-form .kicker / h1 rules. Values copied from the
+   gift form; change them here, not in a form. */
+p.form-eyebrow{
+  color:#B8935A; /* --gold-4 */
+  font-family:'IBM Plex Sans Arabic', sans-serif;
+  font-size:13px; font-weight:400; letter-spacing:.06em; line-height:1.7;
+  text-transform:none; margin:0 0 10px;
+}
+html[lang="en"] p.form-eyebrow{ font-family:'Jost', sans-serif; }
+h1.form-title{
+  color:#101B24; /* --navy */
+  font-family:'Amiri', serif; font-weight:700;
+  font-size:34px; line-height:1.25; margin:0 0 14px;
+}
+html[lang="en"] h1.form-title{ font-family:'Cormorant Garamond', serif; font-weight:600; }
+@media (max-width:640px){ h1.form-title{ font-size:24px; } }
+/* The language switch sets [data-en]{display:inline}; the opening stays
+   block so eyebrow and title never run together on one line. */
+html[lang="en"] p.form-eyebrow[data-en], html[lang="en"] h1.form-title[data-en]{ display:block; }

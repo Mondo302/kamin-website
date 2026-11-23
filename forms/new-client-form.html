@@ -1,0 +1,1584 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>قصتك الكامنة، تتجلى | Your Hidden Story, Revealed | Kamin</title>
+<meta name="description" content="يساعدنا هذا النموذج على فهم احتياجاتك وترشيح باقة الخدمة الأنسب لك. This form helps us understand your needs and recommend the most suitable service package.">
+<meta property="og:title" content="قصتك الكامنة، تتجلى | Your Hidden Story, Revealed | Kamin">
+<meta property="og:description" content="يساعدنا هذا النموذج على فهم احتياجاتك وترشيح باقة الخدمة الأنسب لك. This form helps us understand your needs and recommend the most suitable service package.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Kamin">
+
+<!--
+  Kamin — New Client Form (1.a.)
+  Built against the confirmed target design (kamin-website.dc.html):
+    navy #101B24 / gold #C6A15E family / Cormorant Garamond+Jost (EN) /
+    Amiri+IBM Plex Sans Arabic (AR).
+
+  REVISED 2026-09-16 against the real meeting spec from the
+  2026-09-16 meeting. Real open items
+  NOT resolved by this build, flagged in-file at the relevant field:
+  (1) whether non-paying visitors should still be asked for email at all —
+  Mohannad's own words, an open dilemma, not decided, so email collection
+  is left as-is; (2) Portfolio Development is now priced (2026-09-17,
+  matches LinkedIn Optimization's tiers) — was previously "price on
+  request"; (3) Full Package bundle's real
+  contents were never given (only Brand/Recent Grad/Interview-Ready were)
+  — shown with contents marked TBC, don't treat the % as final either
+  until checked against kamin-website.dc.html's Service Menu, which
+  actually uses a DIFFERENT bundle system (Gold/Platinum/Diamond, senior/
+  executive tier) than these four early-career-tier bundle names — a real
+  mismatch between the live Google Form spec and the marketing site,
+  surfaced here, not resolved.
+
+  WIRED TO SUPABASE 2026-09-13. Writes into `clients` + `service_requests`
+  (see ../db/schema.sql). No unique key exists on clients.client_name in
+  the real WIP sheet, so this always inserts a new client row — the
+  same open dedup risk schema.md already flags, not solved here.
+  Gift/Add-on selections not covered by the `service_type` enum
+  (Biography, Resume Translation, Portfolio Development) are recorded in
+  `remarks` text, not as a structured service_request row — the enum has
+  no matching value for them.
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,500&family=Jost:wght@300;400;500;600;700&family=Amiri:wght@400;700&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --navy:#101B24; --navy-1:#1B2530; --navy-2:#16232E; --navy-3:#1E2E3A;
+    --gold:#C6A15E; --gold-1:#D4AF6A; --gold-2:#E3C88A; --gold-3:#DCC08A;
+    --gold-4:#B8935A; --gold-5:#8B6B3E;
+    --cream:#FCFAF6; --cream-1:#F6F1E9; --cream-2:#F3EFE7; --cream-3:#EFE8DB;
+    --cream-4:#E8E4DB; --cream-5:#D9CFBB;
+    --gray-1:#AEB8BF; --gray-2:#C7CFD5; --gray-3:#D8DEE3; --gray-4:#8B95A0;
+    --gray-5:#7C858F; --gray-6:#5F6870;
+    --err:#B23A3A;
+    --font-ar-display:'Amiri', serif;
+    --font-ar-body:'IBM Plex Sans Arabic', sans-serif;
+    --font-en-display:'Cormorant Garamond', serif;
+    --font-en-body:'Jost', sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0; background:var(--cream); color:var(--navy);
+    font-family:var(--font-ar-body); line-height:1.7; position:relative;
+  }
+  /* ---- ambient glow behind the frosted cards (glassmorphism pass, 2026-09-17) ----
+     Mirrors the dark-dashboard's .shell::before technique, re-tuned for
+     this form's light cream surface instead of copying its navy values. */
+  body::before{
+    content:''; position:fixed; inset:0; z-index:-1; pointer-events:none;
+    background:
+      radial-gradient(680px 420px at 14% -8%, rgba(198,161,94,.16), transparent 60%),
+      radial-gradient(520px 360px at 100% 10%, rgba(198,161,94,.09), transparent 65%),
+      var(--cream);
+  }
+  html[lang="en"] body{ font-family:var(--font-en-body); }
+  h1,h2,h3,.display{ font-family:var(--font-ar-display); font-weight:700; }
+  html[lang="en"] h1, html[lang="en"] h2, html[lang="en"] h3, html[lang="en"] .display{
+    font-family:var(--font-en-display); font-weight:600;
+  }
+
+  /* ---- nav ---- */
+  .nav{
+    position:sticky; top:0; z-index:50;
+    background:rgba(16,27,36,.9); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+    border-bottom:1px solid rgba(198,161,94,.22);
+    padding:16px 28px; display:flex; align-items:center; justify-content:space-between;
+  }
+  .nav .word{ color:var(--gold); font-family:var(--font-ar-display); font-size:22px; letter-spacing:.04em; }
+  html[lang="en"] .nav .word{ font-family:var(--font-en-display); }
+  .langbtn{
+    background:transparent; border:1px solid var(--gold-3); color:var(--gold-2);
+    border-radius:20px; padding:6px 16px; font-size:13px; cursor:pointer;
+    font-family:inherit;
+  }
+  .langbtn:hover{ background:rgba(198,161,94,.12); }
+
+  /* ---- shell ---- */
+  .wrap{ max-width:720px; margin:0 auto; padding:48px 20px 100px; }
+  .kicker{ color:var(--gold-4); font-size:13px; letter-spacing:.06em; margin:0 0 10px; }
+  h1{ font-size:34px; line-height:1.25; margin:0 0 14px; color:var(--navy); }
+  .lede{ color:var(--gray-6); font-size:16px; max-width:56ch; margin:0 0 6px; }
+  .meta-line{ color:var(--gray-5); font-size:13.5px; margin:24px 0 0; }
+
+  /* ---- step indicator ---- */
+  .steps{ display:flex; gap:8px; margin:32px 0 28px; }
+  .step-dot{
+    flex:1; height:4px; border-radius:2px; background:var(--cream-5);
+  }
+  .step-dot.done, .step-dot.active{ background:var(--gold); }
+  .step-label{ font-size:13px; color:var(--gray-5); margin-bottom:24px; }
+  .step-label b{ color:var(--navy); }
+
+  /* ---- panels ---- */
+  .panel{ display:none; }
+  .panel.active{ display:block; animation:fade .25s ease; }
+  @keyframes fade{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;} }
+
+  .card{
+    background:rgba(255,255,255,.62); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+    border:1px solid rgba(198,161,94,.22); border-radius:10px;
+    padding:24px; margin-bottom:16px;
+    box-shadow:0 1px 0 rgba(255,255,255,.6) inset, 0 16px 40px -24px rgba(16,27,36,.25);
+  }
+  .card h3{ font-size:19px; margin:0 0 4px; color:var(--navy); }
+  .card .hint{ font-size:13.5px; color:var(--gray-5); margin:0 0 16px; }
+  .subhead{ font-size:12.5px; letter-spacing:.05em; color:var(--gold-5); font-weight:700; margin:0 0 14px; text-transform:uppercase; }
+  .subhead:not(:first-child){ margin-top:26px; padding-top:22px; border-top:1px solid var(--cream-3); }
+
+  .field{ margin-bottom:18px; }
+  .field:last-child{ margin-bottom:0; }
+  label.flabel{ display:block; font-size:14px; font-weight:600; color:var(--navy-1); margin-bottom:7px; }
+  .req{ color:var(--err); margin-inline-start:3px; }
+  input[type="text"], input[type="email"], input[type="tel"], input[type="url"],
+  select, textarea{
+    width:100%; padding:11px 13px; border:1px solid var(--gray-2); border-radius:7px;
+    font-size:15px; font-family:inherit; background:var(--cream); color:var(--navy);
+  }
+  input:focus, select:focus, textarea:focus{
+    outline:none; border-color:var(--gold); box-shadow:0 0 0 3px rgba(198,161,94,.18);
+  }
+  textarea{ min-height:90px; resize:vertical; }
+
+  .opt-grid{ display:flex; flex-wrap:wrap; gap:10px; }
+  .opt{
+    display:flex; align-items:center; gap:8px; border:1px solid var(--gray-2);
+    border-radius:8px; padding:10px 14px; cursor:pointer; font-size:14.5px;
+    background:var(--cream); transition:.15s;
+  }
+  .opt:has(input:checked){ border-color:var(--gold); background:var(--gold-2); background:rgba(198,161,94,.12); }
+  .opt input{ accent-color:var(--gold-5); }
+
+  .price-tag{ color:var(--gold-5); font-weight:600; margin-inline-start:6px; }
+  .decline{ color:var(--gray-5); font-size:13.5px; }
+
+  .upload{
+    border:1.5px dashed var(--gray-2); border-radius:8px; padding:20px;
+    text-align:center; color:var(--gray-5); font-size:13.5px; cursor:pointer;
+  }
+  .upload:hover{ border-color:var(--gold-3); }
+
+  .membership-card{
+    background:var(--navy); color:var(--cream); border-radius:10px; padding:24px;
+    margin-bottom:16px;
+  }
+  .membership-card h3{ color:var(--gold-2); }
+  .membership-card ul{ margin:12px 0 0; padding-inline-start:20px; font-size:14.5px; line-height:2; }
+  .membership-card li b{ color:#fff; }
+
+  .actions{ display:flex; justify-content:space-between; gap:12px; margin-top:28px; }
+  button.btn, a.btn{
+    font-family:inherit; font-size:15px; font-weight:600; border-radius:8px;
+    padding:13px 26px; cursor:pointer; border:1px solid transparent;
+  }
+  .btn-primary{ background:var(--navy); color:var(--cream); }
+  .btn-primary:hover{ background:var(--navy-3); }
+  .btn-ghost{ background:transparent; border-color:var(--gray-2); color:var(--gray-6); }
+  .btn-ghost:hover{ border-color:var(--gray-4); }
+  .btn-primary:disabled{ opacity:.45; cursor:not-allowed; }
+
+  .err-msg{ color:var(--err); font-size:13px; margin-top:6px; display:none; }
+  .field.invalid .err-msg{ display:block; }
+  .field.invalid input, .field.invalid select, .field.invalid textarea{ border-color:var(--err); }
+
+  .terms-box{ max-height:50vh; overflow-y:auto; border:1px solid var(--gray-2); border-radius:8px; padding:16px 18px; background:#fff; font-size:14px; line-height:1.7; color:var(--gray-6); }
+  .terms-box h4{ margin:0 0 8px; font-size:16px; color:var(--navy); }
+  .terms-box h5{ margin:16px 0 6px; font-size:14px; color:var(--navy); }
+  .terms-box ul{ margin:0; padding-inline-start:18px; }
+  .terms-box p{ margin:0; }
+  .terms-agree{ display:flex; gap:10px; align-items:flex-start; margin-top:14px; font-size:14px; line-height:1.6; cursor:pointer; }
+  .terms-agree input{ margin-top:3px; width:18px; height:18px; flex-shrink:0; }
+  .terms-agree input:disabled ~ span{ opacity:.55; }
+  .btn:disabled{ opacity:.5; cursor:not-allowed; }
+  .card[hidden]{ display:none; }
+  .contact-actions{ display:flex; gap:12px; flex-wrap:wrap; margin:14px 0 6px; }
+  .contact-actions .btn{ text-decoration:none; display:inline-block; text-align:center; min-width:140px; }
+  /* Secondary to WhatsApp: same size and corners, navy outline instead of navy fill. */
+  .contact-actions .btn-outline{ background:transparent; border-color:var(--navy); color:var(--navy); }
+  .contact-actions .btn-outline:hover{ border-color:var(--gold); color:var(--gold-5); }
+  .contact-actions .btn:focus-visible{ outline:2px solid var(--gold); outline-offset:2px; }
+  .card p a{ color:var(--gold-5); font-weight:600; text-decoration:none; }
+  .card p a:hover{ text-decoration:underline; }
+  .pay-submit{ width:100%; }
+  .phone, a[href^="tel:"]{ white-space:nowrap; }
+  .done-screen{ display:none; text-align:center; padding:60px 20px; }
+  .done-screen.active{ display:block; }
+  .done-screen .ico{ font-size:44px; color:var(--gold); margin-bottom:12px; }
+
+  [data-en]{ display:none; }
+  html[lang="en"] [data-ar]{ display:none; }
+  html[lang="en"] [data-en]{ display:inline; }
+  html[lang="en"] [data-en].block{ display:block; }
+  /* Fixed 2026-09-17: the generic rule above forces display:inline onto
+     EVERY [data-en] element, including inherently block tags (h1, p) —
+     that's why English broke kicker/h1/lede into one jammed inline run
+     while Arabic (which never gets that override) rendered fine. These
+     tag-specific overrides win on specificity without needing a .block
+     class hand-added to every element. */
+  html[lang="en"] h1[data-en], html[lang="en"] h2[data-en], html[lang="en"] h3[data-en],
+  html[lang="en"] p[data-en], html[lang="en"] div[data-en]{ display:block; }
+
+  /* ---- searchable country/city combobox with A-Z jump (added 2026-09-17) ----
+     Replaces the old short hand-typed <select> lists. Keyed to the Latin
+     alphabet for the jump strip regardless of active language, same
+     convention most bilingual GCC directories use. */
+  .combo{ position:relative; }
+  .combo-input{
+    width:100%; padding:11px 13px; border:1px solid var(--gray-2); border-radius:7px;
+    font-size:15px; background:var(--cream); color:var(--navy); cursor:pointer;
+  }
+  .combo-input:focus{ outline:none; border-color:var(--gold); box-shadow:0 0 0 3px rgba(198,161,94,.18); }
+  .combo-placeholder{ color:var(--gray-5); }
+  .combo-input.has-value .combo-placeholder{ color:var(--navy); }
+  .combo-panel{
+    position:absolute; z-index:70; top:calc(100% + 6px); left:0; right:0;
+    background:rgba(255,255,255,.88); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+    border:1px solid var(--gray-2); border-radius:8px;
+    box-shadow:0 12px 32px rgba(16,27,36,.18); display:none; overflow:hidden;
+  }
+  .combo-panel.open{ display:block; }
+  .combo-search{ padding:8px; border-bottom:1px solid var(--cream-3); }
+  .combo-search input{
+    width:100%; padding:8px 10px; border:1px solid var(--gray-2); border-radius:6px;
+    font-size:13.5px; font-family:inherit; background:var(--cream); color:var(--navy);
+  }
+  .combo-body{ display:flex; max-height:280px; }
+  .combo-list{ flex:1; overflow-y:auto; padding:4px 0; }
+  .combo-list .combo-letter-header{
+    position:sticky; top:0; background:var(--cream-1); font-size:11px; color:var(--gray-5);
+    padding:5px 14px; font-weight:600; letter-spacing:.03em;
+  }
+  .combo-list .combo-option{ padding:9px 14px; cursor:pointer; font-size:14px; color:var(--navy); }
+  .combo-list .combo-option:hover{ background:rgba(198,161,94,.12); }
+  .combo-list .combo-empty{ padding:16px; font-size:13px; color:var(--gray-5); text-align:center; }
+  .combo-az{
+    width:24px; flex-shrink:0; display:flex; flex-direction:column; align-items:center;
+    padding:6px 2px; border-inline-start:1px solid var(--cream-3); overflow-y:auto;
+  }
+  .combo-az span{ font-size:9.5px; color:var(--gray-4); cursor:pointer; padding:1.5px 0; line-height:1.3; }
+  .combo-az span.has-entries:hover{ color:var(--gold-5); font-weight:700; }
+  .combo-az span:not(.has-entries){ color:var(--cream-5); cursor:default; }
+
+  /* ---- price estimate (last step since 2026-10-02; was screen zero) ---- */
+  .quote-estimate{
+    background:var(--navy); color:var(--cream); border-radius:10px; padding:22px 24px;
+    margin:18px 0; display:none;
+  }
+  .quote-estimate.show{ display:block; }
+  .quote-estimate .qe-label{ font-size:12.5px; color:var(--gold-2); letter-spacing:.04em; margin:0 0 6px; }
+  .quote-estimate .qe-range{ font-family:var(--font-en-display); font-size:30px; color:#fff; }
+  .quote-estimate .qe-note{ font-size:12.5px; color:var(--gray-2); margin-top:8px; }
+
+  /* ---- automatic bundle tier + summary sections (slice 2B) ---- */
+  .bundle-tier{ display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:44px; padding:12px 14px; border:1px solid var(--gray-2); border-radius:10px; font-size:14px; color:var(--gray-6); }
+  .bundle-tier.on{ border-color:var(--gold); background:rgba(198,161,94,.12); color:var(--navy); }
+  .bundle-tier .t-name{ display:block; font-weight:600; font-size:15px; }
+  .bundle-tier .t-lock{ display:block; font-size:12px; color:var(--gray-5); margin-top:2px; }
+  .bundle-tier .t-pct{ font-weight:600; font-size:20px; white-space:nowrap; }
+  .pay-section{ font-size:11.5px; letter-spacing:.08em; text-transform:uppercase; font-weight:600; color:var(--gray-5); margin:14px 0 4px; }
+  html:not([lang="en"]) .pay-section{ letter-spacing:0; text-transform:none; font-size:13px; }
+  .pay-row.sub{ font-weight:600; }
+
+  /* ---- payment summary (step 4) ---- */
+  .pay-row{ display:flex; justify-content:space-between; padding:9px 0; border-top:1px solid var(--cream-2); font-size:14.5px; }
+  .pay-row:first-of-type{ border-top:none; }
+  .pay-row.discount span:last-child{ color:#2E7D32; }
+  /* Owner notes 2026-10-18: a discounted service shows its old price struck and the new one in the same green. */
+  .pay-row.svc s{ color:var(--gray-5); text-decoration:line-through; margin-inline-end:6px; }
+  .pay-row.svc .now{ color:#2E7D32; }
+  .pay-note{ margin:2px 0 10px; font-size:12.5px; color:#2E7D32; }
+  .pay-row.total{ border-top:2px solid var(--navy); margin-top:6px; padding-top:14px; font-size:18px; font-weight:700; }
+  .pay-note{ font-size:12px; color:var(--gray-5); margin-top:14px; }
+
+  /* ---- real Saudi Riyal symbol (SAMA, 2025), added 2026-09-17 ----
+     A masked PNG, not text or the old ﷼ Unicode character — that old
+     character isn't the actual official symbol our team showed. Masking
+     (not a plain <img>) lets it inherit currentColor so it matches
+     gold text on light cards and cream text on the dark membership
+     card without needing separate color variants of the asset. */
+  .sar{
+    display:inline-block; width:0.78em; height:0.78em; background-color:currentColor;
+    -webkit-mask-image:url(data:image/png;base64,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); -webkit-mask-size:contain;
+    -webkit-mask-repeat:no-repeat; -webkit-mask-position:center; -webkit-mask-mode:alpha;
+    mask-image:url(data:image/png;base64,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); mask-size:contain;
+    mask-repeat:no-repeat; mask-position:center; mask-mode:alpha;
+    vertical-align:-0.1em; margin-inline-start:3px;
+  }
+
+
+  /* ---- mobile (added 2026-09-21, deepened same day) ----
+     Clients fill these in on a phone, one-handed, often from a WhatsApp
+     link. Beyond fitting the screen: 44px touch targets, safe-area
+     padding for notched phones, and 16px fields so iOS stops zooming. */
+  html{ -webkit-text-size-adjust:100%; text-size-adjust:100%; }
+
+  @media (max-width: 640px){
+    input, select, textarea{ font-size:16px; min-height:44px; }
+    textarea{ min-height:96px; }
+
+    /* Radio and checkbox rows are the most-tapped things on these forms */
+    .opt, label.opt{ min-height:44px; display:flex; align-items:center; }
+
+    .wrap, .card, .panel, .sheet{
+      padding-left:calc(16px + env(safe-area-inset-left));
+      padding-right:calc(16px + env(safe-area-inset-right));
+    }
+    h1{ font-size:24px; line-height:1.25; }
+    h2{ font-size:19px; }
+    .opt-grid, .grid, .two-col{ grid-template-columns:1fr !important; }
+
+    /* Step buttons: full width, stacked, primary action under the thumb */
+    .actions{
+      flex-direction:column-reverse; gap:10px;
+      padding-bottom:calc(8px + env(safe-area-inset-bottom));
+    }
+    .actions button, .actions .btn{ width:100%; min-height:48px; font-size:15px; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:.01ms !important; transition-duration:.01ms !important; }
+  }
+  /* Error lines per language (fixed 2026-09-26): the language toggle rule
+     html[lang="en"] [data-en]{display:inline} outranked .err-msg{display:none},
+     so in English every "Required" line showed from page load, and an
+     invalid field in Arabic also showed its English line. Hidden until the
+     field is invalid, and only in the page language. */
+  html[lang] body .err-msg[data-en], html[lang] body .err-msg[data-ar]{ display:none; }
+  html[lang="en"] body .field.invalid .err-msg[data-en]{ display:block; }
+  html:not([lang="en"]) body .field.invalid .err-msg[data-ar]{ display:block; }
+  .done-screen .done-btn{ display:inline-flex; align-items:center; justify-content:center; min-height:44px; margin-top:20px; padding:12px 26px; border-radius:8px; border:1px solid transparent; background:var(--navy); color:var(--cream); font-family:inherit; font-size:15px; font-weight:600; text-decoration:none; }
+  .done-screen .done-btn:hover{ background:var(--navy-3); }
+  .done-screen .done-btn:focus-visible{ outline:2px solid var(--gold); outline-offset:2px; }
+</style>
+<link rel="stylesheet" href="../assets/kamin-fields.css">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon-32.png">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<meta name="theme-color" content="#101B24">
+</head>
+<body>
+
+<nav class="nav">
+  <a class="word" href="/" data-home-link="1" style="display:inline-flex; text-decoration:none;"><img src="../assets/kamin-logo-mark.png" alt="Kamin" style="height:24px; width:auto; display:block;"></a>
+  <button class="langbtn" id="langToggle" type="button" onclick="toggleLang()">English</button>
+</nav>
+
+<!-- The price estimate used to open this form (screen zero, 2026-09-17).
+     Since 2026-10-02 it is the last step: the visitor fills in the details
+     first and sees the final price after discounts at the end. -->
+<div class="wrap" id="fullFormWrap">
+  <div id="formRoot">
+    <p class="kicker form-eyebrow" data-ar>كامن &middot; استوديو التطوير المهني، تأسس 2019</p>
+    <p class="kicker form-eyebrow" data-en>Kamin &middot; premium career advancement studio, est. 2019</p>
+    <h1 class="form-title" data-ar>قصتك الكامنة، تتجلى</h1>
+    <h1 class="form-title" data-en>Your Hidden Story, Revealed</h1>
+    <p class="lede" data-ar>يساعدنا هذا النموذج على فهم احتياجاتك وترشيح باقة الخدمة الأنسب لك. المدة المتوقعة: 2–4 دقائق.</p>
+    <p class="lede" data-en>This form helps us understand your needs and recommend the most suitable service package. Estimated time: 2–4 minutes.</p>
+
+    <div class="steps">
+      <div class="step-dot active" id="dot1"></div>
+      <div class="step-dot" id="dot2"></div>
+      <div class="step-dot" id="dot3"></div>
+      <div class="step-dot" id="dot4"></div>
+      <div class="step-dot" id="dot5"></div>
+    </div>
+    <p class="step-label" id="stepLabel">
+      <b data-ar>1 من 5</b><b data-en>1 of 5</b>: <span data-ar>أخبرنا عنك</span><span data-en>About You</span>
+    </p>
+
+    <form id="newClientForm" novalidate>
+  <p id="pricesError" class="err-msg" role="alert" style="display:none"><span data-en>Prices couldn't load. Refresh the page.</span><span data-ar>تعذّر تحميل الأسعار. حدّث الصفحة.</span></p>
+
+      <!-- ============ STEP 1 — ABOUT YOU ============ -->
+      <section class="panel active" data-step="1">
+        <div class="card">
+          <!-- Open dilemma, not decided (Mohannad, 2026-09-16 meeting): whether
+               non-paying visitors should be asked for email at all. Left as-is
+               pending a real decision. Existing-client check added below per
+               the separate, already-decided "direct to login" requirement. -->
+          <div class="field" data-required>
+            <label class="flabel"><span data-ar>البريد الإلكتروني</span><span data-en>Email</span><span class="req">*</span></label>
+            <input type="email" name="email" required id="emailInput" autocomplete="email" dir="ltr" spellcheck="false" autocapitalize="off">
+            <div class="err-msg" data-ar>يرجى إدخال بريد إلكتروني صالح</div><div class="err-msg" data-en>Enter a valid email address</div>
+          </div>
+
+          <div class="field" data-required>
+            <label class="flabel"><span data-ar>الاسم الكامل</span><span data-en>Full Name</span><span class="req">*</span></label>
+            <input type="text" name="fullName" required autocomplete="name">
+            <div class="err-msg" data-ar>مطلوب</div><div class="err-msg" data-en>Required</div>
+          </div>
+
+          <div class="field" data-required>
+            <label class="flabel"><span data-ar>رقم الجوال</span><span data-en>Mobile Number</span><span class="req">*</span></label>
+            <input type="tel" name="mobile" dir="ltr" required inputmode="tel" autocomplete="tel">
+            <div class="err-msg" data-ar>مطلوب</div><div class="err-msg" data-en>Required</div>
+          </div>
+
+          <!-- "Phone Number (optional)" removed 2026-09-26 (Mohannad: it served the
+               same purpose as Mobile). It only ever reached service_requests.remarks
+               as "Secondary phone: ..."; that line in buildServiceRequests was
+               removed on release-candidate (form-ux check intake-asks-for-one-mobile-number). -->
+
+          <div class="field" data-required>
+            <label class="flabel"><span data-ar>الدولة</span><span data-en>Country</span><span class="req">*</span></label>
+            <div class="combo" id="countryCombo">
+              <div class="combo-input" tabindex="0" role="button" onclick="toggleCombo('country')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleCombo('country');}">
+                <span id="countryComboLabel" class="combo-placeholder" data-label-ar="اختر الدولة" data-label-en="Select country">اختر الدولة</span>
+              </div>
+              <input type="hidden" name="country" id="countryValue" required>
+              <div class="combo-panel" id="countryComboPanel">
+                <div class="combo-search"><input type="text" data-ph-ar="بحث..." data-ph-en="Search..." placeholder="بحث..." oninput="filterCombo('country', this.value)"></div>
+                <div class="combo-body">
+                  <div class="combo-list" id="countryComboList"></div>
+                  <div class="combo-az" id="countryComboAz"></div>
+                </div>
+              </div>
+            </div>
+            <div class="err-msg" data-ar>مطلوب</div><div class="err-msg" data-en>Required</div>
+          </div>
+
+          <div class="field" data-required>
+            <label class="flabel"><span data-ar>المدينة</span><span data-en>City</span><span class="req">*</span></label>
+            <div class="combo" id="cityCombo">
+              <div class="combo-input" tabindex="0" role="button" onclick="toggleCombo('city')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleCombo('city');}">
+                <span id="cityComboLabel" class="combo-placeholder" data-label-ar="اختر الدولة أولًا" data-label-en="Select a country first">اختر الدولة أولًا</span>
+              </div>
+              <input type="hidden" name="city" id="cityValue" required>
+              <div class="combo-panel" id="cityComboPanel">
+                <div class="combo-search"><input type="text" data-ph-ar="بحث..." data-ph-en="Search..." placeholder="بحث..." oninput="filterCombo('city', this.value)"></div>
+                <div class="combo-body">
+                  <div class="combo-list" id="cityComboList"></div>
+                  <div class="combo-az" id="cityComboAz"></div>
+                </div>
+              </div>
+            </div>
+            <div class="err-msg" data-ar>مطلوب</div><div class="err-msg" data-en>Required</div>
+          </div>
+          <div class="field" data-required id="cityOtherField" style="display:none;">
+            <label class="flabel"><span data-ar>اسم المدينة</span><span data-en>City name</span><span class="req">*</span></label>
+            <input type="text" name="cityOther" id="cityOther" required autocomplete="address-level2" oninput="document.getElementById('cityValue').value = this.value;">
+            <div class="err-msg" data-ar>مطلوب</div><div class="err-msg" data-en>Required</div>
+          </div>
+
+          <div class="field" data-required>
+            <label class="flabel"><span data-ar>الجنس</span><span data-en>Sex</span><span class="req">*</span></label>
+            <div class="opt-grid">
+              <label class="opt"><input type="radio" name="sex" value="male" required> <span data-ar>ذكر</span><span data-en>Male</span></label>
+              <label class="opt"><input type="radio" name="sex" value="female"> <span data-ar>أنثى</span><span data-en>Female</span></label>
+            </div>
+            <div class="err-msg" data-ar>مطلوب</div><div class="err-msg" data-en>Required</div>
+          </div>
+
+          <div class="field" data-required>
+            <label class="flabel"><span data-ar>الفئة العمرية</span><span data-en>Age Group</span><span class="req">*</span></label>
+            <select name="ageGroup" required>
+              <option value="" class="select-placeholder" data-label-ar="اختر" data-label-en="Select" selected>اختر</option>
+              <option value="18-24">18–24</option>
+              <option value="25-34">25–34</option>
+              <option value="35-44">35–44</option>
+              <option value="45-54">45–54</option>
+              <option value="55+">55+</option>
+            </select>
+            <div class="err-msg" data-ar>مطلوب</div><div class="err-msg" data-en>Required</div>
+          </div>
+
+          <div class="field" data-required>
+            <label class="flabel"><span data-ar>المستوى التعليمي</span><span data-en>Education Level</span><span class="req">*</span></label>
+            <select name="education" required data-lang-only>
+              <option value="" selected></option>
+              <option value="highschool" data-i18n="ثانوي|High School">ثانوي | High School</option>
+              <option value="diploma">دبلوم | Diploma</option>
+              <option value="bachelor">بكالوريوس | Bachelor's</option>
+              <option value="master">ماجستير | Master's</option>
+              <option value="phd">دكتوراه | PhD</option>
+              <option value="other">أخرى | Other</option>
+            </select>
+            <div class="err-msg" data-ar>مطلوب</div><div class="err-msg" data-en>Required</div>
+          </div>
+
+          <div class="field" data-required data-group="commLang">
+            <label class="flabel"><span data-ar>لغة التواصل</span><span data-en>Communication Language</span><span class="req">*</span></label>
+            <div class="opt-grid">
+              <label class="opt"><input type="checkbox" name="commLang" value="ar"> <span data-ar>العربية</span><span data-en>Arabic</span></label>
+              <label class="opt"><input type="checkbox" name="commLang" value="en"> <span data-ar>الإنجليزية</span><span data-en>English</span></label>
+            </div>
+            <div class="err-msg" data-ar>اختر لغة واحدة على الأقل</div><div class="err-msg" data-en>Select at least one</div>
+          </div>
+
+          <div class="field" data-required>
+            <label class="flabel"><span data-ar>المسمى الوظيفي الحالي + المسميات المستهدفة</span><span data-en>Current job title + Target job title(s)</span><span class="req">*</span></label>
+            <input type="text" name="jobTitles" required>
+            <div class="err-msg" data-ar>مطلوب</div><div class="err-msg" data-en>Required</div>
+          </div>
+
+          <div class="field" data-required data-group="targetLoc">
+            <label class="flabel"><span data-ar>المواقع المستهدفة</span><span data-en>Target location(s)</span><span class="req">*</span></label>
+            <div class="opt-grid">
+              <label class="opt"><input type="checkbox" name="targetLoc" value="ksa"> <span data-ar>السعودية</span><span data-en>KSA</span></label>
+              <label class="opt"><input type="checkbox" name="targetLoc" value="gcc"> <span data-ar>الخليج (خارج السعودية)</span><span data-en>GCC (outside KSA)</span></label>
+              <label class="opt"><input type="checkbox" name="targetLoc" value="intl"> <span data-ar>دولي</span><span data-en>International</span></label>
+              <label class="opt"><input type="checkbox" name="targetLoc" value="remote"> <span data-ar>عن بُعد</span><span data-en>Remote / Open to remote</span></label>
+            </div>
+            <div class="err-msg" data-ar>اختر موقعًا واحدًا على الأقل</div><div class="err-msg" data-en>Select at least one</div>
+          </div>
+
+          <div class="field" data-required>
+            <label class="flabel"><span data-ar>الهدف المهني / التوجه</span><span data-en>Career Goal / Target Direction</span><span class="req">*</span></label>
+            <div class="hint" style="margin:0 0 8px"><span data-ar>شارك 1-3 جمل عن مجالك ونوع الدور والشركات المحددة إن وجدت.</span><span data-en>Share 1–3 sentences about your industry focus, role type/seniority, and any specific companies.</span></div>
+            <textarea name="careerGoal" required></textarea>
+            <div class="err-msg" data-ar>مطلوب</div><div class="err-msg" data-en>Required</div>
+          </div>
+
+          <div class="field">
+            <label class="flabel"><span data-ar>رابط لينكدإن (اختياري)</span><span data-en>LinkedIn Profile URL (optional)</span></label>
+            <input type="url" name="linkedin" dir="ltr" data-kind="linkedin" inputmode="url" autocomplete="url" spellcheck="false" autocapitalize="off">
+          </div>
+
+          <div class="field" data-required>
+            <label class="flabel"><span data-ar>كيف تعرفت على كامن؟</span><span data-en>How did you hear about Kamin?</span><span class="req">*</span></label>
+            <select name="hearAbout" required data-lang-only onchange="toggleReferrer()">
+              <option value="" selected></option>
+              <option value="whatsapp">واتساب | WhatsApp</option>
+              <option value="instagram">إنستغرام | Instagram</option>
+              <option value="linkedin">لينكدإن | LinkedIn</option>
+              <option value="x">منصة X | X</option>
+              <option value="referral">إحالة/توصية | Referral</option>
+              <option value="gift">هدية | Gift</option>
+              <option value="website">موقعنا الإلكتروني | Our Website</option>
+              <option value="other">أخرى | Other</option>
+            </select>
+            <div class="err-msg" data-ar>مطلوب</div><div class="err-msg" data-en>Required</div>
+          </div>
+
+          <!-- Shown only when "How did you hear about Kamin?" = Referral (toggleReferrer). -->
+          <div id="referrerFields" style="display:none">
+            <!-- Referral explanation: Kamin's own text (2026-10-15). -->
+            <div class="field" id="referralInfo">
+              <p class="flabel"><strong><span data-ar>خصم الإحالة: أعطِ 10% وخذ 10%</span><span data-en>Referral Discount: Give 10%, Get 10%</span></strong></p>
+              <p class="hint"><span data-ar>عند إحالة/توصية صديق وقيامه بالحجز والدفع، يحصل الصديق على خصم 10% على أول خدمة، ويحصل المُحيل على خصم 10% على الخدمة القادمة.</span><span data-en>When a friend is referred and completes booking and payment, the friend receives 10% off their first service, and the referrer receives 10% off their next service.</span></p>
+              <p class="hint"><span data-ar>الشروط: صالحة لمدة 6 أشهر؛ ولا تُجمع مع الباقات أو العضوية أو رسوم الاستعجال/الأولوية</span><span data-en>Rules: valid for 6 months; not combinable with bundles, membership, or express/priority delivery fees.</span></p>
+            </div>
+            <div class="field" data-required>
+              <label class="flabel"><span data-ar>الاسم الأول لمن أحالك</span><span data-en>Referrer first name</span><span class="req">*</span></label>
+              <input type="text" name="referrerFirst" autocomplete="off">
+              <div class="err-msg" data-ar>مطلوب</div><div class="err-msg" data-en>Required</div>
+            </div>
+            <div class="field" data-required>
+              <label class="flabel"><span data-ar>اسم العائلة لمن أحالك</span><span data-en>Referrer last name</span><span class="req">*</span></label>
+              <input type="text" name="referrerLast" autocomplete="off">
+              <div class="err-msg" data-ar>مطلوب</div><div class="err-msg" data-en>Required</div>
+            </div>
+            <!-- Owner notes 2026-10-18: referrer mobile, required. type="tel" gets the same
+                 kamin-fields mobile rule as the client's own number (no second rule). -->
+            <div class="field" data-required>
+              <label class="flabel"><span data-ar>رقم جوال من أحالك</span><span data-en>Referrer mobile number</span><span class="req">*</span></label>
+              <input type="tel" name="referrerPhone" dir="ltr" inputmode="tel" autocomplete="off">
+              <div class="err-msg" data-ar>مطلوب</div><div class="err-msg" data-en>Required</div>
+            </div>
+          </div>
+
+          <div class="field" data-required>
+            <label class="flabel"><span data-ar>سنوات الخبرة</span><span data-en>Years of Experience</span><span class="req">*</span></label>
+            <div class="hint" style="margin:0 0 8px"><span data-ar>شريحة التسعير حسب سنوات الخبرة. دقتك تضمن أفضل تجربة.</span><span data-en>Pricing tier is based on years of experience. Your accuracy ensures the best experience.</span></div>
+            <div class="opt-grid">
+              <label class="opt"><input type="radio" name="tier" value="early" required onchange="renderTier()"> <span data-ar>المهنيون الصاعدون (0–3 سنوات)</span><span data-en>Emerging Professional (0–3 yrs)</span></label>
+              <label class="opt"><input type="radio" name="tier" value="mid" onchange="renderTier()"> <span data-ar>المهنيون المتمرسون (3–7 سنوات)</span><span data-en>Experienced Professional (3–7 yrs)</span></label>
+              <label class="opt"><input type="radio" name="tier" value="senior" onchange="renderTier()"> <span data-ar>كبار المحترفين (7–15 سنة)</span><span data-en>Senior (7–15 yrs)</span></label>
+              <label class="opt"><input type="radio" name="tier" value="executive" onchange="renderTier()"> <span data-ar>القيادات التنفيذية (15+ سنة)</span><span data-en>Executive (15+ yrs)</span></label>
+            </div>
+            <div class="err-msg" data-ar>مطلوب</div><div class="err-msg" data-en>Required</div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <span></span>
+          <button type="button" class="btn btn-primary" onclick="goStep(2)"><span data-ar>التالي</span><span data-en>Next</span></button>
+        </div>
+      </section>
+
+      <!-- ============ STEP 2 — SERVICES & BUNDLES ============ -->
+      <section class="panel" data-step="2">
+        <div class="card">
+          <p class="hint" style="margin-bottom:20px">
+            <span data-ar>لكل الخدمات الكتابية: تشمل جولة تعديل واحدة، والتسليم النهائي بصيغتي PDF وWord. جولات إضافية: 299<span class="sar"></span> للساعة.</span>
+            <span data-en>For all written services: 1 round of edits included, final delivery in both PDF and Word. Additional revision rounds: 299<span class="sar"></span>/hour.</span>
+          </p>
+
+          <p class="subhead" data-ar>الخدمات الأساسية</p>
+          <p class="subhead" data-en>Core Services</p>
+
+          <div class="field" data-required>
+            <label class="flabel"><span data-ar>إعداد السيرة الذاتية</span><span data-en>Resume Writing</span><span class="req">*</span></label>
+            <div class="opt-grid">
+              <label class="opt"><input type="radio" name="resumeWriting" value="yes" required onchange="toggleResumeLang()">
+                <span data-ar>نعم</span><span data-en>Yes</span> <span class="price-tag" data-price="resumeWriting"></span></label>
+              <label class="opt"><input type="radio" name="resumeWriting" value="no" onchange="toggleResumeLang()">
+                <span class="decline"><span data-ar>لا أرغب</span><span data-en>Not ordering</span></span></label>
+            </div>
+            <div class="err-msg" data-ar>مطلوب</div><div class="err-msg" data-en>Required</div>
+          </div>
+
+          <div class="field" id="resumeLangField" style="display:none;">
+            <label class="flabel"><span data-ar>لغة السيرة الذاتية</span><span data-en>Resume Language</span></label>
+            <div class="opt-grid">
+              <label class="opt"><input type="checkbox" name="resumeLang" value="ar" onchange="syncTranslation()"> <span data-ar>العربية</span><span data-en>Arabic</span></label>
+              <label class="opt"><input type="checkbox" name="resumeLang" value="en" onchange="syncTranslation()"> <span data-ar>الإنجليزية</span><span data-en>English</span></label>
+            </div>
+          </div>
+
+          <div class="field" data-required>
+            <label class="flabel"><span data-ar>تطوير ملف لينكدإن</span><span data-en>LinkedIn Optimization</span><span class="req">*</span></label>
+            <div class="opt-grid">
+              <label class="opt"><input type="radio" name="linkedinOpt" value="yes" required onchange="renderPaymentSummary()">
+                <span data-ar>نعم</span><span data-en>Yes</span> <span class="price-tag" data-price="linkedinOpt"></span></label>
+              <label class="opt"><input type="radio" name="linkedinOpt" value="no" onchange="renderPaymentSummary()">
+                <span class="decline"><span data-ar>لا أرغب</span><span data-en>Not ordering</span></span></label>
+            </div>
+            <div class="err-msg" data-ar>مطلوب</div><div class="err-msg" data-en>Required</div>
+          </div>
+
+          <p class="subhead" data-ar>تطوير ملف الأعمال</p>
+          <p class="subhead" data-en>Professional Portfolio Development</p>
+          <!-- Replaces ATS Service per the meeting. Priced same as LinkedIn
+               Optimization's tiers (confirmed 2026-09-17), not "on request". -->
+          <div class="field" data-required>
+            <label class="flabel"><span data-ar>تطوير ملف الأعمال</span><span data-en>Portfolio Development</span><span class="req">*</span></label>
+            <div class="opt-grid">
+              <label class="opt"><input type="radio" name="portfolioDev" value="yes" required onchange="renderPaymentSummary()"> <span data-ar>نعم، أضف الخدمة</span><span data-en>Yes, add it</span> <span class="price-tag" data-price="portfolioDev"></span></label>
+              <label class="opt"><input type="radio" name="portfolioDev" value="no" onchange="renderPaymentSummary()"> <span class="decline"><span data-ar>غير مطلوب حاليًا</span><span data-en>Not needed at this time</span></span></label>
+            </div>
+            <div class="err-msg" data-ar>مطلوب</div><div class="err-msg" data-en>Required</div>
+          </div>
+
+          <p class="subhead" data-ar>خدمات مميّزة</p>
+          <p class="subhead" data-en>Premium Services</p>
+          <div class="field">
+            <div class="opt-grid">
+              <label class="opt"><input type="checkbox" name="addon" value="interview" onchange="renderPaymentSummary()"> <span data-ar>تدريب مقابلات (60 د)</span><span data-en>Interview Coaching (60 min)</span> <span class="price-tag" data-flat-price="interview"></span></label>
+              <label class="opt"><input type="checkbox" name="addon" value="career" onchange="renderPaymentSummary()"> <span data-ar>إرشاد مهني (60 د)</span><span data-en>Career Coaching (60 min)</span> <span class="price-tag" data-flat-price="career"></span></label>
+            </div>
+          </div>
+
+          <p class="subhead" data-ar>خدمات إضافية</p>
+          <p class="subhead" data-en>Add-On Services</p>
+          <div class="field">
+            <div class="opt-grid">
+              <label class="opt"><input type="checkbox" name="addon" value="ats" onchange="renderPaymentSummary()"> <span data-ar>خدمة أنظمة تتبّع المتقدمين (ATS)</span><span data-en>ATS Optimization</span> <span class="price-tag" data-flat-price="ats"></span></label>
+              <label class="opt"><input type="checkbox" name="addon" value="coverletter" onchange="renderPaymentSummary()"> <span data-ar>خطاب تعريفي</span><span data-en>Cover Letter Writing</span> <span class="price-tag" data-flat-price="coverletter"></span></label>
+              <label class="opt"><input type="checkbox" name="addon" value="bio" onchange="renderPaymentSummary()"> <span data-ar>نبذة شخصية</span><span data-en>Biography Writing</span> <span class="price-tag" data-flat-price="bio"></span></label>
+              <label class="opt"><input type="checkbox" name="addon" value="translation" onchange="renderPaymentSummary()"> <span data-ar>ترجمة السيرة الذاتية</span><span data-en>Resume Translation</span> <span class="price-tag" data-flat-price="translation"></span></label>
+            </div>
+          </div>
+
+          <p class="subhead" data-ar>الباقات</p>
+          <p class="subhead" data-en>Bundles</p>
+          <!-- Slice 2B (2026-10-15): no Single/Bundle choice. The bundle tier is
+               picked by how many paid services are ordered, from the tiers in
+               public.price_list, and shown locked. Membership does not count. -->
+          <div class="field">
+            <div class="hint" style="margin:0 0 8px"><span data-ar>كلما طلبت أكثر، وفّرت أكثر. عند اختيار خدمتين أو أكثر يُطبَّق خصم الباقة تلقائيًا: الباقة الذهبية 5% لخدمتين، الباقة البلاتينية 8% لثلاث خدمات، الباقة الماسية 10% لأربع خدمات أو أكثر. لا يُجمع خصم الباقة مع خصم الإحالة.</span><span data-en>Order more, save more. Choose two or more services and your bundle discount is applied automatically: Gold Bundle 5% for 2 services, Platinum Bundle 8% for 3, Diamond Bundle 10% for 4 or more. The bundle discount is not combined with the referral discount.</span></div>
+            <div id="bundleTier" class="bundle-tier" data-tier="" aria-live="polite"></div>
+          </div>
+
+          <!-- 11. Delivery speed only applies to Resume Writing: shown only when it is ordered. -->
+          <div id="deliveryField" style="display:none;">
+          <p class="subhead" data-ar>سرعة التسليم</p>
+          <p class="subhead" data-en>Delivery Speed</p>
+          <div class="field" data-required>
+            <label class="flabel"><span data-ar>سرعة التسليم</span><span data-en>Delivery Speed</span><span class="req">*</span></label>
+            <div class="hint" style="margin:0 0 8px"><span data-ar>تُحتسب من بداية مكالمتك الاستشارية. تنطبق على كتابة السيرة الذاتية فقط، وتُسلَّم بقية الخدمات خلال 1–2 يوم عمل.</span><span data-en>Counted from the start of your consultation call. Applies to Resume Writing only; all other services are delivered within 1–2 business days.</span></div>
+            <div class="opt-grid">
+              <label class="opt"><input type="radio" name="delivery" value="standard" required onchange="renderPaymentSummary()"> <span data-ar>تسليم اعتيادي (5 أيام عمل من بداية المكالمة)</span><span data-en>Standard (5 business days from the consultation call)</span></label>
+              <label class="opt"><input type="radio" name="delivery" value="priority" onchange="renderPaymentSummary()"> <span data-ar>أولوية (3 أيام من بداية المكالمة) <span dir="ltr" data-speed-pct="priority"></span></span><span data-en>Priority (3 business days from the consultation call) <span data-speed-pct="priority"></span></span></label>
+              <label class="opt"><input type="radio" name="delivery" value="express" onchange="renderPaymentSummary()"> <span data-ar>عاجل (48 ساعة من بداية المكالمة) <span dir="ltr" data-speed-pct="express"></span></span><span data-en>Express (48 hours from the consultation call) <span data-speed-pct="express"></span></span></label>
+            </div>
+            <div class="err-msg" data-ar>مطلوب</div><div class="err-msg" data-en>Required</div>
+          </div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="button" class="btn btn-ghost" onclick="goStep(1)"><span data-ar>السابق</span><span data-en>Back</span></button>
+          <button type="button" class="btn btn-primary" onclick="goStep(3)"><span data-ar>التالي</span><span data-en>Next</span></button>
+        </div>
+      </section>
+
+      <!-- ============ STEP 3 — MEMBERSHIP ============ -->
+      <section class="panel" data-step="3">
+        <div class="membership-card">
+          <h3><span data-ar>عضوية كامن السنوية</span><span data-en>Kamin Annual Membership</span></h3>
+          <ul>
+            <li><b data-ar>خصم 15%</b><b data-en>15% off</b> <span data-ar>على جميع الخدمات طوال السنة</span><span data-en>all services all year long</span></li>
+            <li><b data-ar>أولوية</b><b data-en>Priority</b> <span data-ar>في جدولة المواعيد</span><span data-en>scheduling</span></li>
+            <li><span data-ar>مكالمة متابعة مجانية </span><span data-en>1 free </span><b data-ar>15 دقيقة</b><b data-en>15-minute</b><span data-ar> سنويًا</span><span data-en> check-in call per year</span></li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <div class="field" data-required>
+            <label class="flabel"><span data-ar>هل ترغب بإضافة عضوية كامن السنوية؟</span><span data-en>Add Kamin Annual Membership?</span><span class="req">*</span></label>
+            <div class="opt-grid">
+              <label class="opt"><input type="radio" name="membership" value="yes" required onchange="renderPaymentSummary()"> <span data-ar>نعم، أضفها</span><span data-en>Yes, add it</span> <span class="price-tag"><span data-flat-price="membership"></span><span data-ar>/سنة</span><span data-en>/yr</span></span></label>
+              <label class="opt"><input type="radio" name="membership" value="no" onchange="renderPaymentSummary()"> <span class="decline"><span data-ar>لا، ليس الآن</span><span data-en>No, not now</span></span></label>
+            </div>
+            <div class="err-msg" data-ar>مطلوب</div><div class="err-msg" data-en>Required</div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="button" class="btn btn-ghost" onclick="goStep(2)"><span data-ar>السابق</span><span data-en>Back</span></button>
+          <button type="button" class="btn btn-primary" onclick="goStep(4)"><span data-ar>التالي</span><span data-en>Next</span></button>
+        </div>
+      </section>
+
+      <!-- ============ STEP 4 — PAYMENT ============ -->
+      <section class="panel" data-step="4">
+        <div class="card">
+          <div class="quote-estimate show" id="estimateBox">
+            <p class="qe-label"><span data-ar>السعر النهائي التقديري بعد الخصومات</span><span data-en>Estimated final price, after discounts</span></p>
+            <div class="qe-range" id="estimateTotal">–</div>
+            <p class="qe-note"><span data-ar>يؤكد فريقنا المبلغ النهائي بعد مراجعة طلبك.</span><span data-en>Our team confirms the final amount after reviewing your request.</span></p>
+          </div>
+          <h3><span data-ar>ملخص الطلب</span><span data-en>Request Summary</span></h3>
+          <p class="hint"><span data-ar>يُحتسب المجموع من الخدمات والباقات وسرعة التسليم والعضوية التي اخترتها.</span><span data-en>Calculated from the services, bundle, delivery speed, and membership you selected.</span></p>
+          <div id="paySummary"></div>
+        </div>
+
+        <div class="actions">
+          <button type="button" class="btn btn-ghost" onclick="goStep(3)"><span data-ar>السابق</span><span data-en>Back</span></button>
+          <button type="button" class="btn btn-primary" id="toTermsBtn" onclick="goStep(5)"><span data-ar>متابعة</span><span data-en>Continue</span></button>
+        </div>
+      </section>
+
+      <!-- ============ STEP 5: TERMS, the last step (2026-11-23: no payment step; the client submits for team review) ============ -->
+      <section class="panel" data-step="5">
+        <div class="card">
+          <h3><span data-ar>الشروط والأحكام</span><span data-en>Terms &amp; Conditions</span></h3>
+          <div class="terms-box" id="termsBox" tabindex="0" role="region" aria-label="Terms &amp; Conditions"></div>
+          <p class="hint" id="termsScrollHint" style="margin-top:10px"><span data-ar>مرّر إلى الأسفل للمتابعة</span><span data-en>Scroll to the bottom to continue</span></p>
+          <label class="terms-agree"><input type="checkbox" id="termsAgree" disabled onchange="checkTermsScrolled()"><span><span data-ar>قرأت الشروط والأحكام وأوافق عليها</span><span data-en>I have read and agree to the Terms &amp; Conditions</span></span></label>
+          <p class="hint privacy-link" style="margin-top:10px"><a data-ar href="/?lang=ar#privacy">كيف نحافظ على خصوصية معلوماتك</a><a data-en href="/?lang=en#privacy">How we keep your information private</a></p>
+        </div>
+        <div class="actions">
+          <button type="button" class="btn btn-ghost" onclick="goStep(4)"><span data-ar>السابق</span><span data-en>Back</span></button>
+          <button type="submit" class="btn btn-primary" id="submitBtn" disabled><span data-ar>إرسال</span><span data-en>Submit</span></button>
+        </div>
+      </section>
+
+    </form>
+  </div>
+
+  <div class="done-screen" id="sentScreen" role="status">
+    <div class="ico">&#10003;</div>
+    <p><span data-ar>وصل طلبك إلى كامن، وسنتواصل معك قريبًا.</span><span data-en>Kamin has your request and will contact you soon.</span></p>
+    <a class="btn btn-primary done-btn" href="/" data-home-link="1"><span data-ar>العودة إلى الموقع</span><span data-en>Back to the website</span></a>
+  </div>
+
+  <div class="err-msg" id="submitError" style="display:none; text-align:center; margin-top:16px;">
+    <span data-ar>حدث خطأ أثناء الإرسال. حاول مرة أخرى.</span><span data-en>Something went wrong submitting the form. Please try again.</span>
+  </div>
+  <div class="err-msg" id="tooFastError" role="alert" style="display:none; text-align:center; margin-top:16px;">
+    <span data-ar>وصلنا طلبك أسرع من المعتاد. راجع بياناتك ثم حاول مرة أخرى.</span><span data-en>That was quicker than we expected. Check your details, then please try again.</span>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="../assets/kamin-supabase.js"></script>
+<script src="../assets/kamin-prices.js"></script>
+<script src="../assets/kamin-errors.js"></script>
+<script src="../assets/kamin-intake.js"></script>
+<script src="../assets/kamin-lang.js"></script>
+<script src="../assets/kamin-guard.js"></script>
+<script src="../assets/kamin-fields.js"></script>
+<script src="../assets/kamin-terms.js"></script>
+<script>
+  /* -------- prices: read from the database (public.price_list, pending 26)
+     at start, before the service prices render. No hard-coded fallback:
+     if the list can't load, the form says so and refuses to submit. -------- */
+  var PRICES = {};
+  var ADDON_PRICES = {};
+  var MEMBERSHIP_PRICE = null;
+  var priceState = 'loading'; // loading | ready | failed
+  var ADDON_LABELS = {
+    interview: { en: 'Interview Coaching', ar: 'تدريب مقابلات' },
+    career: { en: 'Career Coaching', ar: 'إرشاد مهني' },
+    ats: { en: 'ATS Optimization', ar: 'خدمة أنظمة تتبّع المتقدمين (ATS)' },
+    coverletter: { en: 'Cover Letter Writing', ar: 'خطاب تعريفي' },
+    bio: { en: 'Biography Writing', ar: 'نبذة شخصية' },
+    translation: { en: 'Resume Translation', ar: 'ترجمة السيرة الذاتية' }
+  };
+  // Bundle tiers and delivery speeds come from public.price_list (slice 2B).
+  var TIERS = [];   // [{ item, name, minServices, percent }] by minServices
+  var SPEED = {};   // { priority: { name, percent, appliesTo }, express: ... }
+  var TIER_AR = { gold: 'الباقة الذهبية', platinum: 'الباقة البلاتينية', diamond: 'الباقة الماسية' }; // website wording
+  var SPEED_AR = { priority: 'أولوية', express: 'عاجل' };
+  /* -------- country + city data (added 2026-09-17) --------
+     Full ~195-country list, replacing the old 9-country hand list.
+     Arabic names are standard/common translations, not independently
+     verified by a native speaker for every entry at this scale — worth
+     a real QA pass before this goes live, flagged rather than silently
+     assumed perfect. Sorted by English name so the A-Z jump lines up. */
+  var COUNTRIES = [
+    ['af','Afghanistan','أفغانستان'],['al','Albania','ألبانيا'],['dz','Algeria','الجزائر'],
+    ['ad','Andorra','أندورا'],['ao','Angola','أنغولا'],['ag','Antigua and Barbuda','أنتيغوا وباربودا'],
+    ['ar','Argentina','الأرجنتين'],['am','Armenia','أرمينيا'],['au','Australia','أستراليا'],
+    ['at','Austria','النمسا'],['az','Azerbaijan','أذربيجان'],['bs','Bahamas','الباهاما'],
+    ['bh','Bahrain','البحرين'],['bd','Bangladesh','بنغلاديش'],['bb','Barbados','باربادوس'],
+    ['by','Belarus','بيلاروسيا'],['be','Belgium','بلجيكا'],['bz','Belize','بليز'],
+    ['bj','Benin','بنين'],['bt','Bhutan','بوتان'],['bo','Bolivia','بوليفيا'],
+    ['ba','Bosnia and Herzegovina','البوسنة والهرسك'],['bw','Botswana','بوتسوانا'],['br','Brazil','البرازيل'],
+    ['bn','Brunei','بروناي'],['bg','Bulgaria','بلغاريا'],['bf','Burkina Faso','بوركينا فاسو'],
+    ['bi','Burundi','بوروندي'],['cv','Cabo Verde','الرأس الأخضر'],['kh','Cambodia','كمبوديا'],
+    ['cm','Cameroon','الكاميرون'],['ca','Canada','كندا'],['cf','Central African Republic','جمهورية أفريقيا الوسطى'],
+    ['td','Chad','تشاد'],['cl','Chile','تشيلي'],['cn','China','الصين'],
+    ['co','Colombia','كولومبيا'],['km','Comoros','جزر القمر'],['cg','Congo-Brazzaville','الكونغو'],
+    ['cd','Congo (DR)','جمهورية الكونغو الديمقراطية'],['cr','Costa Rica','كوستاريكا'],['hr','Croatia','كرواتيا'],
+    ['cu','Cuba','كوبا'],['cy','Cyprus','قبرص'],['cz','Czechia','التشيك'],
+    ['dk','Denmark','الدنمارك'],['dj','Djibouti','جيبوتي'],['dm','Dominica','دومينيكا'],
+    ['do','Dominican Republic','جمهورية الدومينيكان'],['ec','Ecuador','الإكوادور'],['eg','Egypt','مصر'],
+    ['sv','El Salvador','السلفادور'],['gq','Equatorial Guinea','غينيا الاستوائية'],['er','Eritrea','إريتريا'],
+    ['ee','Estonia','إستونيا'],['sz','Eswatini','إسواتيني'],['et','Ethiopia','إثيوبيا'],
+    ['fj','Fiji','فيجي'],['fi','Finland','فنلندا'],['fr','France','فرنسا'],
+    ['ga','Gabon','الغابون'],['gm','Gambia','غامبيا'],['ge','Georgia','جورجيا'],
+    ['de','Germany','ألمانيا'],['gh','Ghana','غانا'],['gr','Greece','اليونان'],
+    ['gd','Grenada','غرينادا'],['gt','Guatemala','غواتيمالا'],['gn','Guinea','غينيا'],
+    ['gw','Guinea-Bissau','غينيا بيساو'],['gy','Guyana','غيانا'],['ht','Haiti','هايتي'],
+    ['hn','Honduras','هندوراس'],['hu','Hungary','المجر'],['is','Iceland','آيسلندا'],
+    ['in','India','الهند'],['id','Indonesia','إندونيسيا'],['ir','Iran','إيران'],
+    ['iq','Iraq','العراق'],['ie','Ireland','أيرلندا'],['it','Italy','إيطاليا'],
+    ['jm','Jamaica','جامايكا'],['jp','Japan','اليابان'],['jo','Jordan','الأردن'],
+    ['kz','Kazakhstan','كازاخستان'],['ke','Kenya','كينيا'],['ki','Kiribati','كيريباتي'],
+    ['kw','Kuwait','الكويت'],['kg','Kyrgyzstan','قيرغيزستان'],['la','Laos','لاوس'],
+    ['lv','Latvia','لاتفيا'],['lb','Lebanon','لبنان'],['ls','Lesotho','ليسوتو'],
+    ['lr','Liberia','ليبيريا'],['ly','Libya','ليبيا'],['li','Liechtenstein','ليختنشتاين'],
+    ['lt','Lithuania','ليتوانيا'],['lu','Luxembourg','لوكسمبورغ'],['mg','Madagascar','مدغشقر'],
+    ['mw','Malawi','مالاوي'],['my','Malaysia','ماليزيا'],['mv','Maldives','المالديف'],
+    ['ml','Mali','مالي'],['mt','Malta','مالطا'],['mh','Marshall Islands','جزر مارشال'],
+    ['mr','Mauritania','موريتانيا'],['mu','Mauritius','موريشيوس'],['mx','Mexico','المكسيك'],
+    ['fm','Micronesia','ميكرونيسيا'],['md','Moldova','مولدوفا'],['mc','Monaco','موناكو'],
+    ['mn','Mongolia','منغوليا'],['me','Montenegro','الجبل الأسود'],['ma','Morocco','المغرب'],
+    ['mz','Mozambique','موزمبيق'],['mm','Myanmar','ميانمار'],['na','Namibia','ناميبيا'],
+    ['nr','Nauru','ناورو'],['np','Nepal','نيبال'],['nl','Netherlands','هولندا'],
+    ['nz','New Zealand','نيوزيلندا'],['ni','Nicaragua','نيكاراغوا'],['ne','Niger','النيجر'],
+    ['ng','Nigeria','نيجيريا'],['kp','North Korea','كوريا الشمالية'],['mk','North Macedonia','مقدونيا الشمالية'],
+    ['no','Norway','النرويج'],['om','Oman','عُمان'],['pk','Pakistan','باكستان'],
+    ['pw','Palau','بالاو'],['ps','Palestine','فلسطين'],['pa','Panama','بنما'],
+    ['pg','Papua New Guinea','بابوا غينيا الجديدة'],['py','Paraguay','باراغواي'],['pe','Peru','بيرو'],
+    ['ph','Philippines','الفلبين'],['pl','Poland','بولندا'],['pt','Portugal','البرتغال'],
+    ['qa','Qatar','قطر'],['ro','Romania','رومانيا'],['ru','Russia','روسيا'],
+    ['rw','Rwanda','رواندا'],['kn','Saint Kitts and Nevis','سانت كيتس ونيفيس'],['lc','Saint Lucia','سانت لوسيا'],
+    ['vc','Saint Vincent and the Grenadines','سانت فينسنت والغرينادين'],['ws','Samoa','ساموا'],['sm','San Marino','سان مارينو'],
+    ['st','Sao Tome and Principe','ساو تومي وبرينسيب'],['sa','Saudi Arabia','السعودية'],['sn','Senegal','السنغال'],
+    ['rs','Serbia','صربيا'],['sc','Seychelles','سيشل'],['sl','Sierra Leone','سيراليون'],
+    ['sg','Singapore','سنغافورة'],['sk','Slovakia','سلوفاكيا'],['si','Slovenia','سلوفينيا'],
+    ['sb','Solomon Islands','جزر سليمان'],['so','Somalia','الصومال'],['za','South Africa','جنوب أفريقيا'],
+    ['kr','South Korea','كوريا الجنوبية'],['ss','South Sudan','جنوب السودان'],['es','Spain','إسبانيا'],
+    ['lk','Sri Lanka','سريلانكا'],['sd','Sudan','السودان'],['sr','Suriname','سورينام'],
+    ['se','Sweden','السويد'],['ch','Switzerland','سويسرا'],['sy','Syria','سوريا'],
+    ['tw','Taiwan','تايوان'],['tj','Tajikistan','طاجيكستان'],['tz','Tanzania','تنزانيا'],
+    ['th','Thailand','تايلاند'],['tl','Timor-Leste','تيمور الشرقية'],['tg','Togo','توغو'],
+    ['to','Tonga','تونغا'],['tt','Trinidad and Tobago','ترينيداد وتوباغو'],['tn','Tunisia','تونس'],
+    ['tr','Turkey','تركيا'],['tm','Turkmenistan','تركمانستان'],['tv','Tuvalu','توفالو'],
+    ['ug','Uganda','أوغندا'],['ua','Ukraine','أوكرانيا'],['ae','United Arab Emirates','الإمارات العربية المتحدة'],
+    ['gb','United Kingdom','المملكة المتحدة'],['us','United States','الولايات المتحدة'],['uy','Uruguay','أوروغواي'],
+    ['uz','Uzbekistan','أوزبكستان'],['vu','Vanuatu','فانواتو'],['va','Vatican City','الفاتيكان'],
+    ['ve','Venezuela','فنزويلا'],['vn','Vietnam','فيتنام'],['ye','Yemen','اليمن'],
+    ['zm','Zambia','زامبيا'],['zw','Zimbabwe','زيمبابوي']
+  ];
+
+  // Deep city coverage for the countries Kamin actually serves; every
+  // other country falls back to a free-text city field (see
+  // renderCityOptions below) — a real "every city on earth" dropdown
+  // would be tens of thousands of entries and worse UX, not better.
+  var CITY_MAP = {
+    sa: [['Riyadh','الرياض'],['Jeddah','جدة'],['Mecca','مكة المكرمة'],['Medina','المدينة المنورة'],
+      ['Dammam','الدمام'],['Khobar','الخبر'],['Dhahran','الظهران'],['Taif','الطائف'],['Tabuk','تبوك'],
+      ['Buraidah','بريدة'],['Khamis Mushait','خميس مشيط'],['Abha','أبها'],['Najran','نجران'],
+      ['Jubail','الجبيل'],['Yanbu','ينبع'],['Al Ahsa','الأحساء'],['Hail','حائل'],['Jazan','جازان'],
+      ['Al Kharj','الخرج'],['Qatif','القطيف'],['Sakaka','سكاكا'],['Arar','عرعر'],['Baha','الباحة'],
+      ['Unaizah','عنيزة'],['Hafar Al-Batin','حفر الباطن']],
+    ae: [['Dubai','دبي'],['Abu Dhabi','أبوظبي'],['Sharjah','الشارقة'],['Ajman','عجمان'],
+      ['Ras Al Khaimah','رأس الخيمة'],['Fujairah','الفجيرة'],['Umm Al Quwain','أم القيوين'],
+      ['Al Ain','العين']],
+    kw: [['Kuwait City','مدينة الكويت'],['Hawalli','حولي'],['Salmiya','السالمية'],['Farwaniya','الفروانية'],
+      ['Jahra','الجهراء'],['Ahmadi','الأحمدي'],['Fahaheel','الفحيحيل']],
+    qa: [['Doha','الدوحة'],['Al Rayyan','الريان'],['Al Wakrah','الوكرة'],['Umm Salal','أم صلال'],
+      ['Al Khor','الخور']],
+    bh: [['Manama','المنامة'],['Muharraq','المحرق'],['Riffa','الرفاع'],['Hamad Town','مدينة حمد'],
+      ['Isa Town','مدينة عيسى']],
+    om: [['Muscat','مسقط'],['Salalah','صلالة'],['Sohar','صحار'],['Nizwa','نزوى'],['Sur','صور'],
+      ['Barka','بركاء']],
+    eg: [['Cairo','القاهرة'],['Alexandria','الإسكندرية'],['Giza','الجيزة'],['Shubra El Kheima','شبرا الخيمة'],
+      ['Port Said','بورسعيد'],['Suez','السويس'],['Luxor','الأقصر'],['Mansoura','المنصورة'],
+      ['Tanta','طنطا'],['Aswan','أسوان'],['Ismailia','الإسماعيلية'],['Faiyum','الفيوم'],
+      ['Zagazig','الزقازيق'],['Hurghada','الغردقة']],
+    jo: [['Amman','عمّان'],['Zarqa','الزرقاء'],['Irbid','إربد'],['Russeifa','الرصيفة'],
+      ['Aqaba','العقبة'],['Salt','السلط'],['Madaba','مأدبا']]
+  };
+
+  function fmtPrice(n){ return n.toLocaleString() + ' <span class="sar"></span>'; }
+
+  /* -------- generic searchable combobox with A-Z jump -------- */
+  var COMBO_ITEMS = {};
+  var COMBO_ONSELECT = {};
+
+  function comboSortedItems(items){
+    return items.slice().sort(function(a, b){ return a[1].localeCompare(b[1]); });
+  }
+
+  // Owner notes 2026-10-18: lists show the form language only. it = [value, English, Arabic].
+  function comboText(it){ return document.documentElement.lang === 'ar' && it[2] ? it[2] : it[1]; }
+
+  function renderComboList(id, items, filterQuery){
+    var listEl = document.getElementById(id + 'ComboList');
+    var arSort = document.documentElement.lang === 'ar';
+    var filtered = !filterQuery ? items : items.filter(function(it){
+      var q = filterQuery.toLowerCase();
+      return it[1].toLowerCase().indexOf(q) > -1 || (it[2] || '').indexOf(filterQuery) > -1;
+    });
+    if (!filtered.length){
+      var lang = document.documentElement.lang;
+      listEl.innerHTML = '<div class="combo-empty">' + (lang === 'ar' ? 'لا نتائج' : 'No results') + '</div>';
+      return;
+    }
+    if (arSort) filtered = filtered.slice().sort(function(a, b){ return comboText(a).localeCompare(comboText(b), 'ar'); });
+    var html = '';
+    var lastLetter = null;
+    filtered.forEach(function(it){
+      // One Arabic header per letter: the alef forms (آ أ إ ٱ) group under ا.
+      var letter = comboText(it).charAt(0).toUpperCase().replace(/[آأإٱ]/, 'ا');
+      if (letter !== lastLetter){
+        html += '<div class="combo-letter-header" data-letter="' + letter + '">' + letter + '</div>';
+        lastLetter = letter;
+      }
+      html += '<div class="combo-option" onclick="selectComboOption(\'' + id + '\',\'' + it[0] + '\')">' +
+        comboText(it) + '</div>';
+    });
+    listEl.innerHTML = html;
+  }
+
+  function renderComboAz(id, items){
+    var azEl = document.getElementById(id + 'ComboAz');
+    var present = {};
+    items.forEach(function(it){ present[it[1].charAt(0).toUpperCase()] = true; });
+    var html = '';
+    for (var c = 65; c <= 90; c++){
+      var letter = String.fromCharCode(c);
+      var has = !!present[letter];
+      html += '<span class="' + (has ? 'has-entries' : '') + '"' +
+        (has ? ' onclick="jumpCombo(\'' + id + '\',\'' + letter + '\')"' : '') + '>' + letter + '</span>';
+    }
+    azEl.innerHTML = html;
+  }
+
+  function initCombo(id, rawItems, onSelect){
+    var items = comboSortedItems(rawItems);
+    COMBO_ITEMS[id] = items;
+    COMBO_ONSELECT[id] = onSelect;
+    renderComboList(id, items);
+    renderComboAz(id, items);
+  }
+
+  function toggleCombo(id){
+    document.querySelectorAll('.combo-panel.open').forEach(function(p){
+      if (p.id !== id + 'ComboPanel') p.classList.remove('open');
+    });
+    var panel = document.getElementById(id + 'ComboPanel');
+    var opening = !panel.classList.contains('open');
+    panel.classList.toggle('open', opening);
+    if (opening){
+      var search = panel.querySelector('.combo-search input');
+      if (search){ search.value = ''; renderComboList(id, COMBO_ITEMS[id] || []); }
+      setTimeout(function(){ if (search) search.focus(); }, 0);
+    }
+  }
+
+  function filterCombo(id, query){
+    renderComboList(id, COMBO_ITEMS[id] || [], query);
+  }
+
+  function jumpCombo(id, letter){
+    var listEl = document.getElementById(id + 'ComboList');
+    var header = listEl.querySelector('.combo-letter-header[data-letter="' + letter + '"]');
+    if (header) header.scrollIntoView({ block: 'start' });
+  }
+
+  function selectComboOption(id, value){
+    var items = COMBO_ITEMS[id] || [];
+    var match = items.filter(function(it){ return it[0] === value; })[0];
+    if (!match) return;
+    document.getElementById(id + 'Value').value = match[0];
+    // lets a flagged Country/City clear as soon as one is picked
+    document.getElementById(id + 'Value').dispatchEvent(new Event('change', { bubbles: true }));
+    var labelEl = document.getElementById(id + 'ComboLabel');
+    labelEl.textContent = comboText(match);
+    labelEl.classList.remove('combo-placeholder');
+    document.getElementById(id + 'ComboPanel').classList.remove('open');
+    if (COMBO_ONSELECT[id]) COMBO_ONSELECT[id](match[0], match[1]);
+  }
+
+  document.addEventListener('click', function(e){
+    if (!e.target.closest('.combo')){
+      document.querySelectorAll('.combo-panel.open').forEach(function(p){ p.classList.remove('open'); });
+    }
+  });
+
+  /* -------- quote lead (since 2026-10-02: saved when the estimate is shown) --------
+     The estimate used to open the form and wrote `quote_leads` on the email
+     blur (2026-09-17). It is now the last step, so the lead is written the
+     first time the visitor reaches it: someone who sees the final price but
+     never submits is still a captured lead. Insert-only, one row per visit. */
+  var quoteLeadId = null, quoteLeadSaving = false;
+
+  // Anon has INSERT but no SELECT/UPDATE on quote_leads under RLS (confirmed
+  // via repro, 2026-09-22) — a client-supplied id lets us insert once
+  // without a `.select()` read-back; once quoteLeadId is set, later visits
+  // to the last step are no-ops rather than an update that does nothing.
+  async function saveQuoteLead(){
+    if (quoteLeadId || quoteLeadSaving || !lastOrder) return;
+    var email = document.getElementById('emailInput').value.trim();
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return;
+    if (intakeGuard && intakeGuard.verdict() === 'bot') return;
+    var tier = currentTier();
+    if (!tier) return;
+    var chosen = ['resumeWriting', 'linkedinOpt', 'portfolioDev'].filter(function(k){
+      var el = document.querySelector('input[name="' + k + '"]:checked');
+      return el && el.value === 'yes';
+    });
+    var id = window.kaminUuid();
+    var row = {
+      id: id,
+      email: email, service_interest: chosen.length ? chosen.join(',') : 'unsure', tier: tier,
+      estimated_min: Math.round(lastOrder.total), estimated_max: Math.round(lastOrder.total)
+    };
+    quoteLeadSaving = true;
+    try {
+      var res = await window.kaminPublicSupabase().from('quote_leads').insert(row);
+      if (res.error){
+        console.error('quote_leads write failed:', res.error);
+        if (window.kaminReportError) window.kaminReportError('quote-lead-save', res.error);
+        return;
+      }
+      quoteLeadId = id;
+    } catch (e){
+      console.error('quote_leads write failed:', e);
+      if (window.kaminReportError) window.kaminReportError('quote-lead-save', e);
+    } finally {
+      quoteLeadSaving = false;
+    }
+  }
+
+  function currentTier(){
+    var t = document.querySelector('input[name="tier"]:checked');
+    return t ? t.value : null;
+  }
+
+  // Referrer names are asked only for a Referral; hidden fields are skipped by kamin-fields.
+  function toggleReferrer(){
+    var sel = document.querySelector('select[name="hearAbout"]');
+    var box = document.getElementById('referrerFields');
+    if (sel && box) box.style.display = sel.value === 'referral' ? '' : 'none';
+    // A Referral swaps the bundle discount for the referral discount, so the summary follows at once.
+    renderPaymentSummary();
+  }
+  window.toggleReferrer = toggleReferrer;
+
+  function renderTier(){
+    var tier = currentTier();
+    document.querySelectorAll('.price-tag[data-price]').forEach(function(el){
+      var key = el.getAttribute('data-price');
+      if (tier && PRICES[key] && PRICES[key][tier] != null){
+        el.innerHTML = fmtPrice(PRICES[key][tier]);
+      } else {
+        el.innerHTML = '';
+      }
+    });
+    renderPaymentSummary();
+  }
+
+  function toggleResumeLang(){
+    var yes = document.querySelector('input[name="resumeWriting"][value="yes"]').checked;
+    document.getElementById('resumeLangField').style.display = yes ? 'block' : 'none';
+    document.getElementById('deliveryField').style.display = yes ? '' : 'none';
+    if (!yes) document.querySelectorAll('input[name="delivery"]').forEach(function(d){ d.checked = false; });
+    renderPaymentSummary();
+    syncTranslation();
+  }
+
+  // 9. Both resume languages -> Translation is ticked and locked. It unlocks
+  // when one language is unticked; a tick the lock added is taken back then.
+  var translationAutoTicked = false;
+  function syncTranslation(){
+    var tr = document.querySelector('input[name="addon"][value="translation"]');
+    var r = document.querySelector('input[name="resumeWriting"]:checked');
+    var both = !!(r && r.value === 'yes') && document.querySelectorAll('input[name="resumeLang"]:checked').length === 2;
+    if (both){
+      if (!tr.checked){ tr.checked = true; translationAutoTicked = true; }
+      tr.disabled = true;
+    } else if (tr.disabled){
+      tr.disabled = false;
+      if (translationAutoTicked) tr.checked = false;
+      translationAutoTicked = false;
+    }
+    renderPaymentSummary();
+  }
+  window.syncTranslation = syncTranslation;
+  // A locked (disabled) Translation is left out of FormData; add it back.
+  function orderedAddons(fd){
+    var a = fd.getAll('addon');
+    var tr = document.querySelector('input[name="addon"][value="translation"]');
+    if (tr.checked && a.indexOf('translation') < 0) a.push('translation');
+    return a;
+  }
+
+  /* -------- country -> city wiring --------
+     A country with real curated coverage (see CITY_MAP above) gets the
+     same searchable combo as Country; anything else falls back to a
+     plain text field instead of pretending to offer choices that don't
+     exist. Either way the real value always ends up in the same hidden
+     #cityValue input, so the rest of the form doesn't need to know
+     which path was used. */
+  function renderCityOptions(countryCode){
+    var cityFieldWrap = document.getElementById('cityCombo').closest('.field');
+    var otherField = document.getElementById('cityOtherField');
+    var cityValueInput = document.getElementById('cityValue');
+    var cityLabel = document.getElementById('cityComboLabel');
+
+    cityValueInput.value = '';
+    cityLabel.textContent = document.documentElement.lang === 'ar' ? 'اختر المدينة' : 'Select city';
+    cityLabel.classList.add('combo-placeholder');
+    document.getElementById('cityOther') && (document.getElementById('cityOther').value = '');
+
+    var cities = CITY_MAP[countryCode];
+    if (cities && cities.length){
+      cityFieldWrap.style.display = '';
+      otherField.style.display = 'none';
+      initCombo('city', cities.map(function(c){ return [c[0], c[0], c[1]]; }), function(){});
+    } else {
+      cityFieldWrap.style.display = 'none';
+      otherField.style.display = 'block';
+    }
+  }
+
+  /* -------- order + payment summary (slice 2B, spec items 10-13) --------
+     Order of calculation: services subtotal -> minus the bundle discount
+     (services only) -> plus the delivery fee -> plus membership -> total.
+     Every paid service (core, portfolio, premium, add-on) counts toward the
+     bundle tier; membership does not. Amounts are kept to the halala.
+     Referral (hearAbout = referral, decided 2026-10-15): REFERRAL_PERCENT of
+     the services subtotal replaces the bundle discount (never both).
+     Delivery fee (owner notes 2026-10-18, reverses the 10-15 rule): the speed
+     percent of the resume price AFTER the bundle or referral discount.
+     Membership is never discounted.
+     The server's quote_order (pending 30) still charges the fee on the list
+     price: it must change in step before this ships. */
+  // Not in public.price_list yet (no referral row exists); move it there when one is added.
+  var REFERRAL_PERCENT = 10;
+  function isReferral(){ var sel = document.querySelector('select[name="hearAbout"]'); return !!(sel && sel.value === 'referral'); }
+  function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  // The test payment page escapes labels, so it gets them without the <bdi> markup.
+  function plain(s){ return s.replace(/<\/?bdi[^>]*>/g, ''); }
+  function money(n){ return Math.round(n * 100) / 100; }
+  function fmtMoney(n){ return n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' <span class="sar"></span>'; }
+  function isYes(name){ var el = document.querySelector('input[name="' + name + '"]:checked'); return !!(el && el.value === 'yes'); }
+
+  function computeOrder(){
+    var tier = currentTier();
+    var lines = [];
+    [['resumeWriting', 'Resume Writing', 'إعداد السيرة الذاتية'], ['linkedinOpt', 'LinkedIn Optimization', 'تطوير ملف لينكدإن'], ['portfolioDev', 'Portfolio Development', 'تطوير ملف الأعمال']].forEach(function(s){
+      if (isYes(s[0]) && tier && PRICES[s[0]] && PRICES[s[0]][tier] != null) lines.push({ en: s[1], ar: s[2], amt: PRICES[s[0]][tier] });
+    });
+    document.querySelectorAll('input[name="addon"]:checked').forEach(function(cb){
+      lines.push({ en: ADDON_LABELS[cb.value].en, ar: ADDON_LABELS[cb.value].ar, amt: ADDON_PRICES[cb.value] });
+    });
+    var subtotal = money(lines.reduce(function(t, l){ return t + l.amt; }, 0));
+    var bundle = null;
+    var referral = isReferral();
+    if (!referral) TIERS.forEach(function(b){ if (lines.length >= b.minServices) bundle = b; });
+    var pct = referral ? REFERRAL_PERCENT : bundle ? bundle.percent : 0;
+    var discount = pct && lines.length ? money(subtotal * pct / 100) : 0;
+    // A price after the discount, in whole halalas (integer maths, no float drift).
+    function netCents(amt){ return Math.round(Math.round(amt * 100) * (100 - pct) / 100); }
+    lines.forEach(function(l){ l.net = netCents(l.amt) / 100; });
+    var resumeOn = isYes('resumeWriting');
+    var d = document.querySelector('input[name="delivery"]:checked');
+    var speed = resumeOn && d ? d.value : null;
+    var sp = speed && SPEED[speed];
+    var base = sp && tier && PRICES[sp.appliesTo] ? PRICES[sp.appliesTo][tier] : null;
+    // Referral (decision 2026-10-18 "b"): the speed fee is on the FULL resume price; bundle: on the discounted one.
+    var fee = base != null ? Math.round((referral ? Math.round(base * 100) : netCents(base)) * sp.percent / 100) / 100 : 0;
+    var membershipFee = isYes('membership') ? MEMBERSHIP_PRICE : 0;
+    return { lines: lines, count: lines.length, subtotal: subtotal, tier: bundle, referral: referral, discount: discount,
+      resumeOn: resumeOn, speed: speed, fee: fee, membershipFee: membershipFee,
+      total: money(subtotal - discount + fee + membershipFee) };
+  }
+
+  // Arabic service counts as the website writes them: الباقة الذهبية (خدمتان), (3 خدمات), (4 خدمات فأكثر).
+  function arCount(n){ return n === 1 ? 'خدمة واحدة' : n === 2 ? 'خدمتان' : n <= 10 ? n + ' خدمات' : n + ' خدمة'; }
+  function renderBundleTier(o, lang){
+    var el = document.getElementById('bundleTier');
+    if (!el) return;
+    var ar = lang === 'ar';
+    el.dataset.tier = o.tier ? o.tier.item : '';
+    el.classList.toggle('on', !!(o.tier || o.referral));
+    if (o.referral){
+      el.innerHTML = '<span><span class="t-name">' + (ar ? 'خصم الإحالة (بعد التأكيد)' : 'Referral discount (subject to confirmation)') + '</span></span><span class="t-pct" dir="ltr">-' + REFERRAL_PERCENT + '%</span>';
+    } else if (o.tier){
+      var name = ar ? (TIER_AR[o.tier.item] || esc(o.tier.name)) : esc(o.tier.name);
+      el.innerHTML = '<span><span class="t-name">' + name + '</span><span class="t-lock">' +
+        (ar ? 'تُطبَّق تلقائيًا (' + arCount(o.count) + ')' : 'Applied automatically (' + o.count + ' services)') +
+        '</span></span><span class="t-pct" dir="ltr">-' + o.tier.percent + '%</span>';
+    } else {
+      var first = TIERS[0];
+      el.innerHTML = '<span>' + (first ? (ar ? 'لا توجد باقة بعد: اطلب ' + (first.minServices === 2 ? 'خدمتين' : first.minServices + ' خدمات') + ' أو أكثر للحصول على خصم الباقة.' : 'No bundle yet: order ' + first.minServices + ' or more services for a bundle discount.') : '') + '</span>';
+    }
+  }
+
+  function renderPaymentSummary(){
+    var container = document.getElementById('paySummary');
+    if (!container) return;
+    if (priceState !== 'ready'){ container.innerHTML = ''; return; }
+    var lang = document.documentElement.lang;
+    var ar = lang === 'ar';
+    var o = computeOrder();
+    renderBundleTier(o, lang);
+    var row = function(label, amt, cls){ return '<div class="pay-row' + (cls ? ' ' + cls : '') + '"><span>' + label + '</span><span dir="ltr">' + amt + '</span></div>'; };
+    var sec = function(key, en, a){ return '<div class="pay-section" data-section="' + key + '">' + (ar ? a : en) + '</div>'; };
+    // Payment page rows: each service at its discounted price; the discount is named once (note).
+    var orderRows = o.lines.map(function(l){ return { en: l.en, ar: l.ar, amt: l.net, svc: true }; });
+
+    var html = sec('services', 'Services', 'الخدمات');
+    html += o.lines.map(function(l){
+      return row(ar ? l.ar : l.en, l.net !== l.amt ? '<s>' + fmtMoney(l.amt) + '</s><span class="now">' + fmtMoney(l.net) + '</span>' : fmtMoney(l.amt), 'svc');
+    }).join('');
+    // His decision 2026-10-18 "b": the Subtotal is the DISCOUNTED subtotal (the sum of the green
+    // prices) and the discount is named once, as a note under it, never subtracted a second time.
+    html += row(ar ? 'المجموع الفرعي' : 'Subtotal', fmtMoney(money(o.subtotal - o.discount)), 'sub');
+    var note = null;
+    if (o.referral && o.discount) note = { en: 'Includes referral discount (−' + REFERRAL_PERCENT + '%, subject to confirmation)',
+      ar: 'تشمل خصم الإحالة (<bdi dir="ltr">−' + REFERRAL_PERCENT + '%</bdi>، بعد التأكيد)' };
+    else if (o.tier) note = { en: 'Includes ' + esc(o.tier.name) + ' (−' + o.tier.percent + '%)',
+      ar: 'تشمل ' + (TIER_AR[o.tier.item] || esc(o.tier.name)) + ' (<bdi dir="ltr">−' + o.tier.percent + '%</bdi>)' };
+    if (note) html += '<p class="pay-note">' + (ar ? note.ar : note.en) + '</p>';
+
+    if (o.resumeOn){
+      html += sec('delivery', 'Delivery', 'التسليم');
+      if (o.speed && o.speed !== 'standard' && SPEED[o.speed]){
+        var dn = { en: esc(SPEED[o.speed].name) + ' (Resume) +' + SPEED[o.speed].percent + '%', ar: (SPEED_AR[o.speed] || esc(SPEED[o.speed].name)) + ' (السيرة الذاتية) <bdi dir="ltr">+' + SPEED[o.speed].percent + '%</bdi>' };
+        html += row(ar ? dn.ar : dn.en, '+' + fmtMoney(o.fee));
+        orderRows.push({ en: dn.en, ar: plain(dn.ar), amt: o.fee });
+      } else if (o.speed === 'standard'){
+        html += row(ar ? 'اعتيادي (5 أيام عمل): بدون رسوم' : 'Standard (5 business days): no fee', fmtMoney(0));
+      } else {
+        html += row(ar ? 'اختر سرعة التسليم' : 'Choose a delivery speed', '');
+      }
+    }
+
+    if (o.membershipFee > 0){
+      html += sec('membership', 'Membership', 'العضوية');
+      html += row(ar ? 'عضوية كامن السنوية' : 'Kamin Annual Membership', fmtMoney(o.membershipFee));
+      orderRows.push({ en: 'Kamin Annual Membership', ar: 'عضوية كامن السنوية', amt: o.membershipFee });
+    }
+
+    html += '<div class="pay-row total" data-section="total"><span>' + (ar ? 'الإجمالي' : 'Total') + '</span><span dir="ltr">' + fmtMoney(o.total) + '</span></div>';
+    lastOrder = { rows: orderRows, note: note ? { en: note.en, ar: plain(note.ar) } : null, total: o.total, totalLabel: fmtMoney(o.total) };
+    var estimateEl = document.getElementById('estimateTotal');
+    if (estimateEl) estimateEl.innerHTML = o.lines.length ? fmtMoney(o.total) : '–';
+
+    container.innerHTML = o.lines.length || o.membershipFee ? html : ('<p class="hint">' + (ar ? 'اختر خدماتك في الخطوة السابقة لعرض الملخص.' : 'Select your services in the previous step to see a summary.') + '</p>');
+  }
+
+  // The order on the summary (rows + total), read by the quote lead.
+  var lastOrder = null;
+
+  /* -------- step navigation -------- */
+  var STEP_LABELS = {
+    1: { ar: 'أخبرنا عنك', en: 'About You' },
+    2: { ar: 'الخدمات والباقات', en: 'Services & Bundles' },
+    3: { ar: 'العضوية', en: 'Membership' },
+    4: { ar: 'التقدير', en: 'Estimate' },
+    5: { ar: 'الشروط والأحكام', en: 'Terms & Conditions' }
+  };
+
+  // Required and format checks live in ../assets/kamin-fields.js (shared by
+  // all four forms): errors appear only when Next/Submit is pressed, for
+  // this step's visible fields, and clear as each field is fixed.
+  function validateStep(n){
+    var panel = document.querySelector('.panel[data-step="' + n + '"]');
+    return KaminFields.validatePanel(panel);
+  }
+
+  function goStep(n){
+    var current = document.querySelector('.panel.active').getAttribute('data-step');
+    if (n > current && !validateStep(current)) return;
+
+    document.querySelectorAll('.panel').forEach(function(p){
+      p.classList.toggle('active', p.getAttribute('data-step') == n);
+    });
+    [1,2,3,4,5].forEach(function(i){
+      document.getElementById('dot' + i).classList.toggle('active', i == n);
+      document.getElementById('dot' + i).classList.toggle('done', i < n);
+    });
+    var lang = document.documentElement.lang;
+    document.getElementById('stepLabel').innerHTML =
+      '<b data-ar>' + n + ' من 5</b><b data-en>' + n + ' of 5</b>: ' +
+      '<span data-ar>' + STEP_LABELS[n].ar + '</span><span data-en>' + STEP_LABELS[n].en + '</span>';
+    applyLang(lang);
+    if (n == 2) renderTier();
+    if (n == 4){ renderPaymentSummary(); }
+    if (n == 5){ renderTerms(); checkTermsScrolled(); }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  /* -------- Terms (step 5, payment plan 2026-10-15) --------
+     The text is the website's own TERMS PAGE, copied into kamin-terms.js.
+     The tick unlocks only once the box has been scrolled to its end; a box
+     that already shows all of its text counts as scrolled. Once scrolled in
+     either language it stays unlocked. */
+  var termsScrolled = false;
+  function renderTerms(){
+    var box = document.getElementById('termsBox');
+    if (!box || box.childElementCount || !window.KAMIN_TERMS) return;
+    ['en', 'ar'].forEach(function(l){
+      var t = window.KAMIN_TERMS[l];
+      var wrap = document.createElement('div');
+      wrap.setAttribute('data-' + l, '');
+      function add(parent, tag, text){ var el = document.createElement(tag); el.textContent = text; parent.appendChild(el); return el; }
+      add(wrap, 'h4', t.title);
+      t.sections.forEach(function(sec){
+        add(wrap, 'h5', sec.heading);
+        var ul = add(wrap, 'ul', '');
+        sec.items.forEach(function(it){ add(ul, 'li', it); });
+      });
+      add(wrap, 'h5', t.confidentialityTitle);
+      add(wrap, 'p', t.confidentialityBody);
+      box.appendChild(wrap);
+    });
+    box.addEventListener('scroll', checkTermsScrolled, { passive: true });
+  }
+  function checkTermsScrolled(){
+    var box = document.getElementById('termsBox');
+    if (box.scrollTop + box.clientHeight >= box.scrollHeight - 4) termsScrolled = true;
+    var agree = document.getElementById('termsAgree');
+    agree.disabled = !termsScrolled;
+    if (!termsScrolled) agree.checked = false;
+    document.getElementById('termsScrollHint').style.display = termsScrolled ? 'none' : '';
+    document.getElementById('submitBtn').disabled = !(termsScrolled && agree.checked);
+  }
+
+  var intakeGuard = kaminFormGuard(document.getElementById('newClientForm'));
+
+  function showPricesError(){
+    var el = document.getElementById('pricesError');
+    if (el) el.style.display = 'block';
+    ['submitBtn', 'toTermsBtn'].forEach(function(id){
+      var btn = document.getElementById(id);
+      if (btn) btn.disabled = true;
+    });
+  }
+  function renderFlatPrices(){
+    document.querySelectorAll('[data-flat-price]').forEach(function(el){
+      var key = el.getAttribute('data-flat-price');
+      var amt = key === 'membership' ? MEMBERSHIP_PRICE : ADDON_PRICES[key];
+      el.innerHTML = amt != null ? amt.toLocaleString() + '<span class="sar"></span>' : '';
+    });
+  }
+  kaminPrices.load().then(function(p){
+    PRICES = p.services;
+    ADDON_PRICES = p.flat;
+    MEMBERSHIP_PRICE = p.membership;
+    TIERS = p.bundles;
+    SPEED = p.speed;
+    document.querySelectorAll('[data-speed-pct]').forEach(function(el){ el.textContent = '+' + SPEED[el.getAttribute('data-speed-pct')].percent + '%'; });
+    priceState = 'ready';
+    renderFlatPrices();
+    renderTier();
+  }).catch(function(err){
+    priceState = 'failed';
+    showPricesError();
+    if (window.console) console.error('price list failed to load', err);
+  });
+
+  /* -------- hold mode (2026-11-15, option b): the form is only a form --------
+     No order, payment, booking or file upload. On submit the answers become ONE
+     plain-text summary (English labels, the client's values as typed, the price
+     summary as shown, the form language) and ONE row goes into contact_messages
+     (anon may insert, not read, so no .select()); its trigger sends the "New
+     website message" email. Reverting the hold-mode commit restores the paying form. */
+  var HOLD_MAX = 5000;
+  var HOLD_MARK = ' [shortened]';
+  function holdClean(s){ return String(s || '').replace(/\s+/g, ' ').trim(); }
+  function holdLabel(field){
+    var el = field.querySelector('.flabel [data-en]');
+    return el ? holdClean(el.textContent) : '';
+  }
+  function holdOptionText(input){
+    var lab = input.closest('label');
+    var en = lab && lab.querySelector('[data-en]');
+    return en ? holdClean(en.textContent) : input.value;
+  }
+  function holdFieldValue(field){
+    var vals = [];
+    field.querySelectorAll('input[name], select[name], textarea[name]').forEach(function(c){
+      if (c.type === 'radio' || c.type === 'checkbox'){ if (c.checked) vals.push(holdOptionText(c)); return; }
+      if (c.tagName === 'SELECT'){
+        var o = c.options[c.selectedIndex];
+        if (o && o.value) vals.push(o.getAttribute('data-t-en') || (o.textContent.split(' | ')[1] || o.textContent).trim());
+        return;
+      }
+      var v = String(c.value || '').trim();
+      if (!v) return;
+      var combo = c.id && /Value$/.test(c.id) && typeof COMBO_ITEMS !== 'undefined' && COMBO_ITEMS && COMBO_ITEMS[c.id.replace(/Value$/, '')];
+      var m = combo ? combo.filter(function(it){ return String(it[0]).toLowerCase() === v.toLowerCase(); })[0] : null;
+      vals.push(m ? m[1] : v);
+    });
+    return vals.join(', ');
+  }
+  // The price summary exactly as the form shows it, read in English.
+  function holdPriceLines(){
+    var lang = document.documentElement.lang;
+    if (lang !== 'en'){ document.documentElement.lang = 'en'; renderPaymentSummary(); }
+    var out = [];
+    document.querySelectorAll('#paySummary .pay-section, #paySummary .pay-row, #paySummary .pay-note').forEach(function(el){
+      if (el.classList.contains('pay-row')){
+        var s = el.children, amt = s[1] ? holdClean((s[1].querySelector('.now') || s[1]).textContent) : '';
+        out.push(holdClean(s[0].textContent) + (amt ? ': ' + amt + ' SAR' : ''));
+      } else out.push(holdClean(el.textContent));
+    });
+    var est = holdClean(document.getElementById('estimateTotal').textContent);
+    if (lang !== 'en'){ document.documentElement.lang = lang; renderPaymentSummary(); }
+    out.push('Estimated final price, after discounts: ' + est + ' SAR');
+    return out;
+  }
+  // Answers in form order. Free-text answers are the only ones ever shortened,
+  // longest first, each marked; none is dropped.
+  function buildHoldSummary(form){
+    var answers = [];
+    form.querySelectorAll('.panel .field').forEach(function(f){
+      if (f.closest('[hidden]') || getComputedStyle(f).display === 'none') return;
+      var label = holdLabel(f), value = holdFieldValue(f);
+      if (label && value) answers.push({ label: label, value: value, full: value, free: !!f.querySelector('textarea, input[type="text"]:not([id$="Value"])') });
+    });
+    var tail = ['Services and prices:'].concat(holdPriceLines(), ['Estimated total: ' + holdClean(document.getElementById('estimateTotal').textContent) + ' SAR', 'Form language: ' + (document.documentElement.lang === 'ar' ? 'Arabic' : 'English')]);
+    function text(){ return ['New client form'].concat(answers.map(function(a){ return a.label + ': ' + a.value; }), tail).join('\n'); }
+    var t = text();
+    var guard = 0;
+    while (t.length > HOLD_MAX && guard++ < 50){
+      var longest = answers.filter(function(a){ return a.free; }).sort(function(a, b){ return b.value.length - a.value.length; })[0];
+      if (!longest || longest.value.length <= HOLD_MARK.length + 20) break;
+      var keep = Math.max(20, longest.value.length - HOLD_MARK.length - (t.length - HOLD_MAX));
+      longest.value = longest.full.slice(0, keep).trim() + HOLD_MARK;
+      t = text();
+    }
+    return t.slice(0, HOLD_MAX);
+  }
+  function holdRow(form){
+    var fd = new FormData(form);
+    var cut = function(v, n){ return String(v || '').trim().slice(0, n); };
+    return {
+      name: cut(fd.get('fullName'), 200),
+      email: cut(fd.get('email'), 320),
+      phone: cut(fd.get('mobile'), 40) || null,
+      reason: 'New client form',
+      message: buildHoldSummary(form),
+      lang: document.documentElement.lang === 'ar' ? 'ar' : 'en'
+    };
+  }
+
+  function showSentScreen(){
+    document.getElementById('formRoot').style.display = 'none';
+    document.getElementById('sentScreen').classList.add('active');
+    window.scrollTo({ top: 0 });
+  }
+
+  var holdSending = false;
+  document.getElementById('newClientForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    if (holdSending) return;
+    if (priceState !== 'ready'){ showPricesError(); return; }
+    if (!document.getElementById('termsAgree').checked){ checkTermsScrolled(); return; }
+    var form = document.getElementById('newClientForm');
+    var submitBtn = document.getElementById('submitBtn');
+    var errEl = document.getElementById('submitError');
+    var fastEl = document.getElementById('tooFastError');
+    errEl.style.display = 'none';
+    fastEl.style.display = 'none';
+    var verdict = intakeGuard.verdict();
+    if (verdict === 'too-fast'){ fastEl.style.display = 'block'; return; }
+    if (verdict === 'bot'){ showSentScreen(); return; }
+
+    holdSending = true;
+    submitBtn.disabled = true;
+    var label = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<span data-ar>جارٍ الإرسال...</span><span data-en>Sending...</span>';
+    applyLang(document.documentElement.lang);
+    (async function(){
+      try {
+        var res = await window.kaminPublicSupabase().from('contact_messages').insert(holdRow(form));
+        if (res.error) throw res.error;
+        showSentScreen();
+      } catch (err){
+        console.error('Kamin new-client-form submit failed:', err);
+        if (window.kaminReportError) window.kaminReportError('intake-submit', err);
+        errEl.style.display = 'block';
+      } finally {
+        holdSending = false;
+        submitBtn.innerHTML = label;
+        applyLang(document.documentElement.lang);
+        checkTermsScrolled();
+      }
+    })();
+  });
+
+  /* -------- language toggle -------- */
+  function applyLang(lang){
+    document.documentElement.lang = lang;
+    document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+    document.getElementById('langToggle').textContent = lang === 'ar' ? 'English' : 'العربية';
+    // Combo placeholders/search boxes carry their own text (data-label-*/
+    // data-ph-*, not the data-ar/data-en toggle spans) since a single
+    // element can't hold two visibility states — refresh them by hand.
+    document.querySelectorAll('.combo-placeholder[data-label-ar], option.select-placeholder[data-label-ar]').forEach(function(el){
+      el.textContent = lang === 'ar' ? el.getAttribute('data-label-ar') : el.getAttribute('data-label-en');
+    });
+    document.querySelectorAll('.combo-search input[data-ph-ar]').forEach(function(el){
+      el.placeholder = lang === 'ar' ? el.getAttribute('data-ph-ar') : el.getAttribute('data-ph-en');
+    });
+    // Owner notes 2026-10-18: option lists in the form language only; values never change,
+    // so a chosen option stays chosen. Texts read once from "Arabic | English".
+    document.querySelectorAll('select[data-lang-only] option').forEach(function(o){
+      if (!o.value) return;
+      if (!o.hasAttribute('data-t-en')){
+        var parts = o.textContent.split(' | ');
+        o.setAttribute('data-t-ar', parts[0].trim());
+        o.setAttribute('data-t-en', (parts[1] || parts[0]).trim());
+      }
+      o.textContent = o.getAttribute(lang === 'ar' ? 'data-t-ar' : 'data-t-en');
+    });
+    // The A-Z jump bar follows English initials, so it shows in English only.
+    document.querySelectorAll('.combo-az').forEach(function(el){ el.style.display = lang === 'ar' ? 'none' : ''; });
+    Object.keys(COMBO_ITEMS || {}).forEach(function(id){
+      renderComboList(id, COMBO_ITEMS[id]);
+      var v = document.getElementById(id + 'Value');
+      var m = v && v.value ? COMBO_ITEMS[id].filter(function(it){ return it[0] === v.value; })[0] : null;
+      if (m) document.getElementById(id + 'ComboLabel').textContent = comboText(m);
+    });
+  }
+  function toggleLang(){
+    applyLang(document.documentElement.lang === 'ar' ? 'en' : 'ar');
+    kaminRememberLang(document.documentElement.lang);
+  }
+
+  applyLang(kaminStartLang('ar'));
+  KaminFields.watch(document.getElementById('newClientForm'));
+  initCombo('country', COUNTRIES, function(code){ renderCityOptions(code); });
+  renderTier();
+</script>
+</body>
+</html>

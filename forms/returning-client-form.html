@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>نموذج عملاء كامن | Kamin Returning Client Form</title>
+<meta name="description" content="يساعدنا هذا النموذج المختصر على معالجة طلبك بسرعة. This short form helps us handle your request quickly.">
+<meta property="og:title" content="نموذج عملاء كامن | Kamin Returning Client Form">
+<meta property="og:description" content="يساعدنا هذا النموذج المختصر على معالجة طلبك بسرعة. This short form helps us handle your request quickly.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Kamin">
+
+<!--
+  Kamin — Returning Client Form (1.b.)
+  Same design system as new-client-form.html in this folder.
+
+  HOLD MODE (2026-11-15 option b; last step per brief 2026-11-23): any
+  visitor may use this form. It asks for full name, email and mobile like
+  the new-client form, keeps the 5% returning-client discount as a price
+  shown (not checked against an account), and its last step is the summary
+  and Terms, with no payment step (2026-11-23, Fatima's meeting minutes:
+  clients submit for team review). Submit writes no
+  order and sends ONE summary row to contact_messages; Kamin contacts the
+  client. Reverting the hold-mode commit restores the signed-in paying form.
+
+  Route logic: "What do you need today?" is now two independent
+  checkboxes — Update existing work / New service(s) — either or both.
+  Checking both routes the client through the Update step AND the New
+  Services steps (reusing new-client-form.html's Core Services/Add-ons/
+  Bundle/Payment structure) in one submission, per the meeting.
+
+  Returning-client 5% discount and the automatic bundle tier ADD UP
+  (decision 2026-10-18 "a", replacing the meeting's "overwritten" rule):
+  5% + Gold 5% = 10%, + Platinum 8% = 13%, + Diamond 10% = 15%.
+
+  WIRED TO SUPABASE. Still no real unique key on clients — see
+  new-client-form.html's header for the same caveat — but this form no
+  longer needs the dedup workaround the old version had, since it now
+  writes against the session's own known client_id instead of inserting
+  a fresh client row from typed fields.
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,500&family=Jost:wght@300;400;500;600;700&family=Amiri:wght@400;700&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --navy:#101B24; --navy-1:#1B2530; --navy-2:#16232E; --navy-3:#1E2E3A;
+    --gold:#C6A15E; --gold-1:#D4AF6A; --gold-2:#E3C88A; --gold-3:#DCC08A;
+    --gold-4:#B8935A; --gold-5:#8B6B3E;
+    --cream:#FCFAF6; --cream-1:#F6F1E9; --cream-2:#F3EFE7; --cream-3:#EFE8DB;
+    --cream-4:#E8E4DB; --cream-5:#D9CFBB;
+    --gray-1:#AEB8BF; --gray-2:#C7CFD5; --gray-3:#D8DEE3; --gray-4:#8B95A0;
+    --gray-5:#7C858F; --gray-6:#5F6870;
+    --err:#B23A3A;
+    --font-ar-display:'Amiri', serif; --font-ar-body:'IBM Plex Sans Arabic', sans-serif;
+    --font-en-display:'Cormorant Garamond', serif; --font-en-body:'Jost', sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{ margin:0; background:var(--cream); color:var(--navy); font-family:var(--font-ar-body); line-height:1.7; position:relative; }
+  /* ---- ambient glow behind the frosted cards (glassmorphism pass, 2026-09-17), same technique as new-client-form.html ---- */
+  body::before{
+    content:''; position:fixed; inset:0; z-index:-1; pointer-events:none;
+    background:
+      radial-gradient(680px 420px at 14% -8%, rgba(198,161,94,.16), transparent 60%),
+      radial-gradient(520px 360px at 100% 10%, rgba(198,161,94,.09), transparent 65%),
+      var(--cream);
+  }
+  html[lang="en"] body{ font-family:var(--font-en-body); }
+  h1,h2,h3,.display{ font-family:var(--font-ar-display); font-weight:700; }
+  html[lang="en"] h1, html[lang="en"] h2, html[lang="en"] h3, html[lang="en"] .display{ font-family:var(--font-en-display); font-weight:600; }
+
+  .nav{ position:sticky; top:0; z-index:50; background:rgba(16,27,36,.9); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+    border-bottom:1px solid rgba(198,161,94,.22); padding:16px 28px; display:flex; align-items:center; justify-content:space-between; }
+  .nav .word{ color:var(--gold); font-family:var(--font-ar-display); font-size:22px; letter-spacing:.04em; }
+  html[lang="en"] .nav .word{ font-family:var(--font-en-display); }
+  .langbtn{ background:transparent; border:1px solid var(--gold-3); color:var(--gold-2); border-radius:20px; padding:6px 16px; font-size:13px; cursor:pointer; font-family:inherit; }
+  .langbtn:hover{ background:rgba(198,161,94,.12); }
+  .badge5{ background:var(--gold-2); color:var(--navy); font-size:12.5px; font-weight:600; border-radius:20px; padding:4px 12px; display:inline-block; margin-bottom:14px; }
+
+  .wrap{ max-width:720px; margin:0 auto; padding:48px 20px 100px; }
+  .kicker{ color:var(--gold-4); font-size:13px; letter-spacing:.06em; margin:0 0 10px; }
+  h1{ font-size:34px; line-height:1.25; margin:0 0 14px; color:var(--navy); }
+  .lede{ color:var(--gray-6); font-size:16px; max-width:56ch; margin:0 0 6px; }
+  .meta-line{ color:var(--gray-5); font-size:13.5px; margin:24px 0 0; }
+  .who-strip{ background:rgba(255,255,255,.62); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); border:1px solid rgba(198,161,94,.22); border-radius:8px; padding:14px 18px; margin:20px 0 0; font-size:14px; color:var(--navy-1); }
+  .who-strip b{ color:var(--gold-5); }
+
+  .steps{ display:flex; gap:8px; margin:32px 0 28px; }
+  .step-dot{ flex:1; height:4px; border-radius:2px; background:var(--cream-5); }
+  .step-dot.done, .step-dot.active{ background:var(--gold); }
+  .step-label{ font-size:13px; color:var(--gray-5); margin-bottom:24px; }
+  .step-label b{ color:var(--navy); }
+
+  .panel{ display:none; } .panel.active{ display:block; animation:fade .25s ease; }
+  @keyframes fade{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;} }
+
+  .card{ background:rgba(255,255,255,.62); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); border:1px solid rgba(198,161,94,.22); border-radius:10px; padding:24px; margin-bottom:16px; box-shadow:0 1px 0 rgba(255,255,255,.6) inset, 0 16px 40px -24px rgba(16,27,36,.25); }
+  .card h3{ font-size:19px; margin:0 0 4px; color:var(--navy); }
+  .card .hint{ font-size:13.5px; color:var(--gray-5); margin:0 0 16px; }
+  .subhead{ font-size:12.5px; letter-spacing:.05em; color:var(--gold-5); font-weight:700; margin:0 0 14px; text-transform:uppercase; }
+  .subhead:not(:first-child){ margin-top:26px; padding-top:22px; border-top:1px solid var(--cream-3); }
+
+  .field{ margin-bottom:18px; } .field:last-child{ margin-bottom:0; }
+  label.flabel{ display:block; font-size:14px; font-weight:600; color:var(--navy-1); margin-bottom:7px; }
+  .req{ color:var(--err); margin-inline-start:3px; }
+  input[type="text"], input[type="email"], input[type="tel"], input[type="url"], input[type="date"],
+  select, textarea{ width:100%; padding:11px 13px; border:1px solid var(--gray-2); border-radius:7px;
+    font-size:15px; font-family:inherit; background:var(--cream); color:var(--navy); }
+  input:focus, select:focus, textarea:focus{ outline:none; border-color:var(--gold); box-shadow:0 0 0 3px rgba(198,161,94,.18); }
+  textarea{ min-height:90px; resize:vertical; }
+
+  .opt-grid{ display:flex; flex-wrap:wrap; gap:10px; }
+  .opt{ display:flex; align-items:center; gap:8px; border:1px solid var(--gray-2); border-radius:8px;
+    padding:10px 14px; cursor:pointer; font-size:14.5px; background:var(--cream); transition:.15s; }
+  .opt:has(input:checked){ border-color:var(--gold); background:rgba(198,161,94,.12); }
+  .opt input{ accent-color:var(--gold-5); }
+  .price-tag{ color:var(--gold-5); font-weight:600; margin-inline-start:6px; }
+  .decline{ color:var(--gray-5); font-size:13.5px; }
+
+  .membership-card{ background:var(--navy); color:var(--cream); border-radius:10px; padding:24px; margin-bottom:16px; }
+  .membership-card h3{ color:var(--gold-2); }
+  .membership-card ul{ margin:12px 0 0; padding-inline-start:20px; font-size:14.5px; line-height:2; }
+  .membership-card li b{ color:#fff; }
+
+  .actions{ display:flex; justify-content:space-between; gap:12px; margin-top:28px; }
+  button.btn{ font-family:inherit; font-size:15px; font-weight:600; border-radius:8px; padding:13px 26px; cursor:pointer; border:1px solid transparent; }
+  .btn-primary{ background:var(--navy); color:var(--cream); } .btn-primary:hover{ background:var(--navy-3); }
+  .btn-ghost{ background:transparent; border-color:var(--gray-2); color:var(--gray-6); } .btn-ghost:hover{ border-color:var(--gray-4); }
+  .btn-primary:disabled{ opacity:.45; cursor:not-allowed; }
+
+  .err-msg{ color:var(--err); font-size:13px; margin-top:6px; display:none; }
+  .field.invalid .err-msg{ display:block; }
+  .field.invalid input, .field.invalid select, .field.invalid textarea{ border-color:var(--err); }
+
+  .done-screen{ display:none; text-align:center; padding:60px 20px; } .done-screen.active{ display:block; }
+  .done-screen .ico{ font-size:44px; color:var(--gold); margin-bottom:12px; }
+  .done-screen .done-btn{ display:inline-flex; align-items:center; justify-content:center; min-height:44px; margin-top:20px; padding:12px 26px; border-radius:8px; border:1px solid transparent; background:var(--navy); color:var(--cream); font-family:inherit; font-size:15px; font-weight:600; text-decoration:none; }
+  .done-screen .done-btn:hover{ background:var(--navy-3); }
+  .done-screen .done-btn:focus-visible{ outline:2px solid var(--gold); outline-offset:2px; }
+
+  [data-en]{ display:none; }
+  html[lang="en"] [data-ar]{ display:none; }
+  html[lang="en"] [data-en]{ display:inline; }
+  html[lang="en"] [data-en].block{ display:block; }
+  /* Fixed 2026-09-17, same bug as new-client-form.html: the generic rule
+     above forces display:inline onto every [data-en] element, including
+     inherently block tags (h1, p) — jams kicker/h1/lede into one line in
+     English while Arabic (never overridden) renders fine. */
+  html[lang="en"] h1[data-en], html[lang="en"] h2[data-en], html[lang="en"] h3[data-en],
+  html[lang="en"] p[data-en], html[lang="en"] div[data-en]{ display:block; }
+
+
+  .pay-row{ display:flex; justify-content:space-between; padding:9px 0; border-top:1px solid var(--cream-2); font-size:14.5px; }
+  .pay-row:first-of-type{ border-top:none; }
+  .pay-row.discount span:last-child{ color:#2E7D32; }
+  .pay-row.total{ border-top:2px solid var(--navy); margin-top:6px; padding-top:14px; font-size:18px; font-weight:700; }
+  .pay-note{ font-size:12px; color:var(--gray-5); margin-top:14px; }
+  /* Same as new-client-form.html: struck old price + green discounted price, sections, automatic bundle tier. */
+  .pay-row.svc s{ color:var(--gray-5); text-decoration:line-through; margin-inline-end:6px; }
+  .pay-row.svc .now{ color:#2E7D32; }
+  .pay-row.sub{ font-weight:600; }
+  .pay-section{ font-size:11.5px; letter-spacing:.08em; text-transform:uppercase; font-weight:600; color:var(--gray-5); margin:14px 0 4px; }
+  html:not([lang="en"]) .pay-section{ letter-spacing:0; text-transform:none; font-size:13px; }
+  .bundle-tier{ display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:44px; padding:12px 14px; border:1px solid var(--gray-2); border-radius:10px; font-size:14px; color:var(--gray-6); }
+  .bundle-tier.on{ border-color:var(--gold); background:rgba(198,161,94,.12); color:var(--navy); }
+  .bundle-tier .t-name{ display:block; font-weight:600; font-size:15px; }
+  .bundle-tier .t-lock{ display:block; font-size:12px; color:var(--gray-5); margin-top:2px; }
+  .bundle-tier .t-pct{ font-weight:600; font-size:20px; white-space:nowrap; }
+
+  /* ---- real Saudi Riyal symbol (SAMA, 2025), added 2026-09-17 ----
+     Same masked-PNG technique as new-client-form.html — see its CSS
+     comment for why masking instead of a plain <img> or the old ﷼
+     Unicode character, which isn't the real official symbol. */
+  .sar{
+    display:inline-block; width:0.78em; height:0.78em; background-color:currentColor;
+    -webkit-mask-image:url(data:image/png;base64,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); -webkit-mask-size:contain;
+    -webkit-mask-repeat:no-repeat; -webkit-mask-position:center; -webkit-mask-mode:alpha;
+    mask-image:url(data:image/png;base64,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); mask-size:contain;
+    mask-repeat:no-repeat; mask-position:center; mask-mode:alpha;
+    vertical-align:-0.1em; margin-inline-start:3px;
+  }
+
+  .recent-work{ border:1px solid var(--cream-5); border-radius:8px; padding:12px 16px; margin-bottom:10px; font-size:13.5px; }
+  .recent-work .rw-top{ display:flex; justify-content:space-between; color:var(--navy-1); font-weight:600; }
+  .recent-work .rw-date{ color:var(--gray-5); font-size:12px; margin-top:2px; }
+
+
+  /* ---- mobile (added 2026-09-21, deepened same day) ----
+     Clients fill these in on a phone, one-handed, often from a WhatsApp
+     link. Beyond fitting the screen: 44px touch targets, safe-area
+     padding for notched phones, and 16px fields so iOS stops zooming. */
+  html{ -webkit-text-size-adjust:100%; text-size-adjust:100%; }
+
+  @media (max-width: 640px){
+    input, select, textarea{ font-size:16px; min-height:44px; }
+    textarea{ min-height:96px; }
+
+    /* Radio and checkbox rows are the most-tapped things on these forms */
+    .opt, label.opt{ min-height:44px; display:flex; align-items:center; }
+
+    .wrap, .card, .panel, .sheet{
+      padding-left:calc(16px + env(safe-area-inset-left));
+      padding-right:calc(16px + env(safe-area-inset-right));
+    }
+    h1{ font-size:24px; line-height:1.25; }
+    h2{ font-size:19px; }
+    .opt-grid, .grid, .two-col{ grid-template-columns:1fr !important; }
+
+    /* Step buttons: full width, stacked, primary action under the thumb */
+    .actions{
+      flex-direction:column-reverse; gap:10px;
+      padding-bottom:calc(8px + env(safe-area-inset-bottom));
+    }
+    .actions button, .actions .btn{ width:100%; min-height:48px; font-size:15px; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:.01ms !important; transition-duration:.01ms !important; }
+  }
+  /* Error lines per language (fixed 2026-09-26): the language toggle rule
+     html[lang="en"] [data-en]{display:inline} outranked .err-msg{display:none},
+     so in English every "Required" line showed from page load, and an
+     invalid field in Arabic also showed its English line. Hidden until the
+     field is invalid, and only in the page language. */
+  html[lang] body .err-msg[data-en], html[lang] body .err-msg[data-ar]{ display:none; }
+  html[lang="en"] body .field.invalid .err-msg[data-en]{ display:block; }
+  html:not([lang="en"]) body .field.invalid .err-msg[data-ar]{ display:block; }
+  /* Terms: same rules as the new-client form. */
+  .terms-box{ max-height:50vh; overflow-y:auto; border:1px solid var(--gray-2); border-radius:8px; padding:16px 18px; background:#fff; font-size:14px; line-height:1.7; color:var(--gray-6); }
+  .terms-box h4{ margin:0 0 8px; font-size:16px; color:var(--navy); }
+  .terms-box h5{ margin:16px 0 6px; font-size:14px; color:var(--navy); }
+  .terms-box ul{ margin:0; padding-inline-start:18px; }
+  .terms-box p{ margin:0; }
+  .terms-agree{ display:flex; gap:10px; align-items:flex-start; margin-top:14px; font-size:14px; line-height:1.6; cursor:pointer; }
+  .terms-agree input{ margin-top:3px; width:18px; height:18px; flex-shrink:0; }
+  .terms-agree input:disabled ~ span{ opacity:.55; }
+  .btn:disabled{ opacity:.5; cursor:not-allowed; }
+  .card[hidden]{ display:none; }
+  .file-name{ flex:0 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:14px; color:var(--gray-6); unicode-bidi:plaintext; }
+  .pay-error{ color:#b42318; font-size:14px; margin:8px 0 0; }
+</style>
+<link rel="stylesheet" href="../assets/kamin-fields.css">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon-32.png">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<meta name="theme-color" content="#101B24">
+</head>
+<body>
+
+<nav class="nav">
+  <a class="word" href="/" data-home-link="1" style="display:inline-flex; text-decoration:none;"><img src="../assets/kamin-logo-mark.png" alt="Kamin" style="height:24px; width:auto; display:block;"></a>
+  <button class="langbtn" id="langToggle" type="button" onclick="toggleLang()">English</button>
+</nav>
+
+<div class="wrap" id="pageWrap">
+  <div id="formRoot">
+    <p class="kicker form-eyebrow" data-ar>كامن &middot; استوديو التطوير المهني، تأسس 2019</p>
+    <p class="kicker form-eyebrow" data-en>Kamin &middot; premium career advancement studio, est. 2019</p>
+    <h1 class="form-title" data-ar>نموذج عملاء كامن</h1>
+    <h1 class="form-title" data-en>Kamin Returning Client Form</h1>
+    <p class="lede" data-ar>يساعدنا هذا النموذج المختصر على معالجة طلبك بسرعة.</p>
+    <p class="lede" data-en>This short form helps us handle your request quickly.</p>
+    <span class="badge5"><span data-ar>خصم 5% للعملاء الحاليين على جميع الخدمات</span><span data-en>Current clients get 5% off all services</span></span>
+
+    <div class="steps">
+      <div class="step-dot active" id="dot1"></div><div class="step-dot" id="dot2"></div>
+      <div class="step-dot" id="dot3"></div><div class="step-dot" id="dot4"></div>
+    </div>
+    <p class="step-label" id="stepLabel"><b data-ar>1 من 4</b><b data-en>1 of 4</b>: <span data-ar>ماذا تحتاج؟</span><span data-en>What you need</span></p>
+
+    <form id="returningForm" novalidate>
+  <p id="pricesError" class="err-msg" role="alert" style="display:none"><span data-en>Prices couldn't load. Refresh the page.</span><span data-ar>تعذّر تحميل الأسعار. حدّث الصفحة.</span></p>
+
+      <!-- ============ STEP 1 — TASK INFO + ROUTE ============ -->
+      <section class="panel active" data-step="1">
+        <!-- Hold mode: no account, so the client types their details again (same fields,
+             validation and look as the new-client form). -->
+        <div class="card">
+          <p class="subhead" data-ar>بياناتك</p>
+          <p class="subhead" data-en>Your Details</p>
+          <div class="field" data-required>
+            <label class="flabel"><span data-ar>الاسم الكامل</span><span data-en>Full Name</span><span class="req">*</span></label>
+            <input type="text" name="fullName" required autocomplete="name">
+            <div class="err-msg" data-ar>مطلوب</div><div class="err-msg" data-en>Required</div>
+          </div>
+          <div class="field" data-required>
+            <label class="flabel"><span data-ar>البريد الإلكتروني</span><span data-en>Email</span><span class="req">*</span></label>
+            <input type="email" name="email" required id="emailInput" autocomplete="email" dir="ltr" spellcheck="false" autocapitalize="off">
+            <div class="err-msg" data-ar>يرجى إدخال بريد إلكتروني صالح</div><div class="err-msg" data-en>Enter a valid email address</div>
+          </div>
+          <div class="field" data-required>
+            <label class="flabel"><span data-ar>رقم الجوال</span><span data-en>Mobile Number</span><span class="req">*</span></label>
+            <input type="tel" name="mobile" dir="ltr" required inputmode="tel" autocomplete="tel">
+            <div class="err-msg" data-ar>مطلوب</div><div class="err-msg" data-en>Required</div>
+          </div>
+        </div>
+        <div class="card">
+          <p class="subhead" data-ar>عن هذا الطلب</p>
+          <p class="subhead" data-en>About This Request</p>
+
+          <div class="field" data-required data-group="commLang"><label class="flabel"><span data-ar>لغة التواصل</span><span data-en>Communication Language</span><span class="req">*</span></label>
+            <div class="opt-grid">
+              <label class="opt"><input type="checkbox" name="commLang" value="ar"> <span data-ar>العربية</span><span data-en>Arabic</span></label>
+              <label class="opt"><input type="checkbox" name="commLang" value="en"> <span data-ar>الإنجليزية</span><span data-en>English</span></label>
+            </div><div class="err-msg" data-ar>اختر لغة واحدة على الأقل</div><div class="err-msg" data-en>Select at least one</div></div>
+
+          <div class="field" data-required><label class="flabel"><span data-ar>المسمى الوظيفي الحالي + المسميات المستهدفة</span><span data-en>Current + target job title(s)</span><span class="req">*</span></label>
+            <input type="text" name="jobTitles" required><div class="err-msg" data-ar>مطلوب</div><div class="err-msg" data-en>Required</div></div>
+
+          <div class="field" data-required data-group="targetLoc"><label class="flabel"><span data-ar>المواقع المستهدفة</span><span data-en>Target location(s)</span><span class="req">*</span></label>
+            <div class="opt-grid">
+              <label class="opt"><input type="checkbox" name="targetLoc" value="ksa"> <span data-ar>السعودية</span><span data-en>KSA</span></label>
+              <label class="opt"><input type="checkbox" name="targetLoc" value="gcc"> <span data-ar>الخليج (خارج السعودية)</span><span data-en>GCC (outside KSA)</span></label>
+              <label class="opt"><input type="checkbox" name="targetLoc" value="intl"> <span data-ar>دولي</span><span data-en>International</span></label>
+              <label class="opt"><input type="checkbox" name="targetLoc" value="remote"> <span data-ar>عن بُعد</span><span data-en>Remote</span></label>
+            </div><div class="err-msg" data-ar>اختر موقعًا واحدًا على الأقل</div><div class="err-msg" data-en>Select at least one</div></div>
+
+          <div class="field" data-required><label class="flabel"><span data-ar>الهدف المهني / التوجه</span><span data-en>Career Goal / Target Direction</span><span class="req">*</span></label>
+            <textarea name="careerGoal" required></textarea><div class="err-msg" data-ar>مطلوب</div><div class="err-msg" data-en>Required</div></div>
+        </div>
+
+        <div class="membership-card">
+          <h3><span data-ar>عضوية كامن السنوية</span><span data-en>Kamin Annual Membership</span></h3>
+          <ul>
+            <li><b data-ar>خصم 15%</b><b data-en>15% off</b> <span data-ar>على جميع الخدمات طوال السنة</span><span data-en>all services all year long</span></li>
+            <li><b data-ar>أولوية</b><b data-en>Priority</b> <span data-ar>في جدولة المواعيد</span><span data-en>scheduling</span></li>
+            <li><span data-ar>مكالمة متابعة مجانية </span><span data-en>1 free </span><b data-ar>15 دقيقة</b><b data-en>15-minute</b><span data-ar> سنويًا</span><span data-en> check-in call per year</span></li>
+          </ul>
+        </div>
+        <div class="card" id="membershipUpsellCard">
+          <div class="field" data-required><label class="flabel"><span data-ar>هل ترغب بإضافة عضوية كامن السنوية؟</span><span data-en>Add Kamin Annual Membership?</span><span class="req">*</span></label>
+            <div class="opt-grid">
+              <label class="opt"><input type="radio" name="membershipAdd" value="yes" required> <span data-ar>نعم، أضفها</span><span data-en>Yes, add it</span> <span class="price-tag"><span data-flat-price="membership"></span><span data-ar>/سنة</span><span data-en>/yr</span></span></label>
+              <label class="opt"><input type="radio" name="membershipAdd" value="no"> <span class="decline"><span data-ar>لا، ليس الآن</span><span data-en>No, not now</span></span></label>
+            </div><div class="err-msg" data-ar>مطلوب</div><div class="err-msg" data-en>Required</div></div>
+        </div>
+
+        <div class="card">
+          <div class="field" data-required data-group="route"><label class="flabel"><span data-ar>ما الذي تحتاجه اليوم؟</span><span data-en>What do you need today?</span><span class="req">*</span></label>
+            <div class="hint" style="margin:0 0 8px"><span data-ar>اختر ما ينطبق. يمكنك اختيار الاثنين معًا.</span><span data-en>Check what applies. You can select both.</span></div>
+            <div class="opt-grid">
+              <label class="opt"><input type="checkbox" name="route" value="update" id="routeUpdate"> <span data-ar>تحديث عمل سابق</span><span data-en>Update existing work</span></label>
+              <label class="opt"><input type="checkbox" name="route" value="new" id="routeNew"> <span data-ar>خدمة جديدة</span><span data-en>New service(s)</span></label>
+            </div><div class="err-msg" data-ar>اختر خيارًا واحدًا على الأقل</div><div class="err-msg" data-en>Select at least one</div></div>
+        </div>
+        <div class="actions"><span></span>
+          <button type="button" class="btn btn-primary" onclick="goNext(1)"><span data-ar>التالي</span><span data-en>Next</span></button>
+        </div>
+      </section>
+
+      <!-- ============ STEP 2 — UPDATE (only if "Update existing work" checked) ============ -->
+      <section class="panel" data-step="2">
+        <div class="card">
+
+          <div class="field" data-required data-group="whatChanged"><label class="flabel"><span data-ar>ما الذي تغيّر منذ آخر تسليم؟</span><span data-en>What changed since our last delivery?</span><span class="req">*</span></label>
+            <div class="opt-grid">
+              <label class="opt"><input type="checkbox" name="whatChanged" value="promotion"> <span data-ar>وظيفة جديدة / ترقية</span><span data-en>New role / promotion</span></label>
+              <label class="opt"><input type="checkbox" name="whatChanged" value="responsibilities"> <span data-ar>مسؤوليات / مشاريع جديدة</span><span data-en>New responsibilities / projects</span></label>
+              <label class="opt"><input type="checkbox" name="whatChanged" value="achievements"> <span data-ar>إنجازات / أرقام جديدة</span><span data-en>New achievements / metrics</span></label>
+              <label class="opt"><input type="checkbox" name="whatChanged" value="skills"> <span data-ar>مهارات / أدوات جديدة</span><span data-en>New skills / tools</span></label>
+              <label class="opt"><input type="checkbox" name="whatChanged" value="certs"> <span data-ar>شهادات / دورات جديدة</span><span data-en>New certifications / courses</span></label>
+              <label class="opt"><input type="checkbox" name="whatChanged" value="newTarget"> <span data-ar>أدوار / قطاع مستهدف جديد</span><span data-en>New target roles / industry</span></label>
+              <label class="opt"><input type="checkbox" name="whatChanged" value="designOnly"> <span data-ar>تصميم/تنسيق فقط</span><span data-en>Design/layout only</span></label>
+            </div>
+            <input type="text" name="whatChangedOther" placeholder="Other" data-placeholder-en="Other" data-placeholder-ar="أخرى" style="margin-top:10px">
+            <div class="err-msg" data-ar>اختر عنصرًا واحدًا على الأقل</div><div class="err-msg" data-en>Select at least one</div></div>
+
+          <div class="field" data-required data-group="updateItem"><label class="flabel"><span data-ar>ما الذي تريد تحديثه؟</span><span data-en>Which are you updating?</span><span class="req">*</span></label>
+            <div class="opt-grid">
+              <label class="opt"><input type="checkbox" name="updateItem" value="resume"> <span data-ar>السيرة الذاتية</span><span data-en>Resume</span></label>
+              <label class="opt"><input type="checkbox" name="updateItem" value="linkedin"> <span data-ar>ملف لينكدإن</span><span data-en>LinkedIn</span></label>
+              <label class="opt"><input type="checkbox" name="updateItem" value="coverletter"> <span data-ar>الخطاب التعريفي</span><span data-en>Cover letter</span></label>
+              <label class="opt"><input type="checkbox" name="updateItem" value="bio"> <span data-ar>النبذة الشخصية</span><span data-en>Bio</span></label>
+            </div><div class="err-msg" data-ar>اختر واحدًا على الأقل</div><div class="err-msg" data-en>Choose at least one</div></div>
+
+          <div class="field" data-required><label class="flabel"><span data-ar>مستوى التحديث</span><span data-en>Update Level</span><span class="req">*</span></label>
+            <div class="opt-grid">
+              <label class="opt"><input type="radio" name="updateLevel" value="light" required> <span data-ar>تحديث بسيط (1–2 ساعة)</span><span data-en>Light refresh (1–2 hours)</span></label>
+              <label class="opt"><input type="radio" name="updateLevel" value="standard"> <span data-ar>تحديث عادي (3 ساعات)</span><span data-en>Standard update (3 hours)</span></label>
+              <label class="opt"><input type="radio" name="updateLevel" value="strategic"> <span data-ar>مراجعة استراتيجية / إعادة هيكلة شاملة (4+ ساعات)</span><span data-en>Strategic review / overhaul (4+ hours)</span></label>
+            </div><div class="err-msg" data-ar>مطلوب</div><div class="err-msg" data-en>Required</div></div>
+
+          <div class="field" data-required><label class="flabel"><span data-ar>طريقة العمل المفضلة</span><span data-en>Preferred working mode</span><span class="req">*</span></label>
+            <div class="opt-grid">
+              <label class="opt"><input type="radio" name="workingMode" value="call" required onchange="toggleWrittenUpdates()"> <span data-ar>مكالمة (موصى بها)</span><span data-en>Call (recommended)</span></label>
+              <label class="opt"><input type="radio" name="workingMode" value="written" onchange="toggleWrittenUpdates()"> <span data-ar>بدون مكالمة: سأرسل التحديثات كتابيًا</span><span data-en>No call: I will provide all updates in writing</span></label>
+            </div><div class="err-msg" data-ar>مطلوب</div><div class="err-msg" data-en>Required</div></div>
+
+          <div class="field" id="writtenUpdatesField" style="display:none;"><label class="flabel"><span data-ar>اكتب تحديثاتك هنا</span><span data-en>Paste your updates here</span></label>
+            <textarea name="writtenUpdates"></textarea></div>
+        </div>
+        <div class="actions">
+          <button type="button" class="btn btn-ghost" onclick="goBack(2)"><span data-ar>السابق</span><span data-en>Back</span></button>
+          <button type="button" class="btn btn-primary" onclick="goNext(2)"><span data-ar>التالي</span><span data-en>Next</span></button>
+        </div>
+      </section>
+
+      <!-- ============ STEP 3 — NEW SERVICES (only if "New service(s)" checked) ============ -->
+      <section class="panel" data-step="3">
+        <div class="card">
+          <div class="field" data-required><label class="flabel"><span data-ar>سنوات الخبرة</span><span data-en>Years of Experience</span><span class="req">*</span></label>
+            <div class="opt-grid">
+              <label class="opt"><input type="radio" name="tier" value="early" onchange="renderTier()"> <span data-ar>المهنيون الصاعدون (0–3 سنوات)</span><span data-en>Emerging Professional (0–3 yrs)</span></label>
+              <label class="opt"><input type="radio" name="tier" value="mid" onchange="renderTier()"> <span data-ar>المهنيون المتمرسون (3–7 سنوات)</span><span data-en>Experienced Professional (3–7 yrs)</span></label>
+              <label class="opt"><input type="radio" name="tier" value="senior" onchange="renderTier()"> <span data-ar>كبار المحترفين (7–15 سنة)</span><span data-en>Senior (7–15 yrs)</span></label>
+              <label class="opt"><input type="radio" name="tier" value="executive" onchange="renderTier()"> <span data-ar>القيادات التنفيذية (15+ سنة)</span><span data-en>Executive (15+ yrs)</span></label>
+            </div><div class="err-msg" data-ar>مطلوب</div><div class="err-msg" data-en>Required</div></div>
+
+          <p class="subhead" data-ar>الخدمات الأساسية</p>
+          <p class="subhead" data-en>Core Services</p>
+
+          <div class="field" data-required><label class="flabel"><span data-ar>إعداد السيرة الذاتية</span><span data-en>Resume Writing</span><span class="req">*</span></label>
+            <div class="opt-grid">
+              <label class="opt"><input type="radio" name="resumeWriting" value="yes" onchange="toggleResumeLang()"> <span data-ar>نعم</span><span data-en>Yes</span> <span class="price-tag" data-price="resumeWriting"></span></label>
+              <label class="opt"><input type="radio" name="resumeWriting" value="no" onchange="toggleResumeLang()"> <span class="decline"><span data-ar>لا أرغب</span><span data-en>Not ordering</span></span></label>
+            </div><div class="err-msg" data-ar>مطلوب</div><div class="err-msg" data-en>Required</div></div>
+
+          <div class="field" id="resumeLangField" style="display:none;"><label class="flabel"><span data-ar>لغة السيرة الذاتية</span><span data-en>Resume Language</span></label>
+            <div class="opt-grid">
+              <label class="opt"><input type="radio" name="resumeLang" value="ar"> <span data-ar>العربية</span><span data-en>Arabic</span></label>
+              <label class="opt"><input type="radio" name="resumeLang" value="en"> <span data-ar>الإنجليزية</span><span data-en>English</span></label>
+            </div></div>
+
+          <div class="field" data-required><label class="flabel"><span data-ar>تطوير ملف لينكدإن</span><span data-en>LinkedIn Optimization</span><span class="req">*</span></label>
+            <div class="opt-grid">
+              <label class="opt"><input type="radio" name="linkedinOpt" value="yes"> <span data-ar>نعم</span><span data-en>Yes</span> <span class="price-tag" data-price="linkedinOpt"></span></label>
+              <label class="opt"><input type="radio" name="linkedinOpt" value="no"> <span class="decline"><span data-ar>لا أرغب</span><span data-en>Not ordering</span></span></label>
+            </div><div class="err-msg" data-ar>مطلوب</div><div class="err-msg" data-en>Required</div></div>
+
+          <p class="subhead" data-ar>تطوير ملف الأعمال</p>
+          <p class="subhead" data-en>Professional Portfolio Development</p>
+          <div class="field" data-required><label class="flabel"><span data-ar>تطوير ملف الأعمال</span><span data-en>Portfolio Development</span><span class="req">*</span></label>
+            <div class="opt-grid">
+              <label class="opt"><input type="radio" name="portfolioDev" value="yes"> <span data-ar>نعم، أضف الخدمة</span><span data-en>Yes, add it</span> <span class="price-tag" data-price="portfolioDev"></span></label>
+              <label class="opt"><input type="radio" name="portfolioDev" value="no"> <span class="decline"><span data-ar>غير مطلوب حاليًا</span><span data-en>Not needed at this time</span></span></label>
+            </div><div class="err-msg" data-ar>مطلوب</div><div class="err-msg" data-en>Required</div></div>
+
+          <p class="subhead" data-ar>خدمات مميّزة</p>
+          <p class="subhead" data-en>Premium Services</p>
+          <div class="field">
+            <div class="opt-grid">
+              <label class="opt"><input type="checkbox" name="addon" value="interview" onchange="renderPaymentSummary()"> <span data-ar>تدريب مقابلات (60 د)</span><span data-en>Interview Coaching (60 min)</span> <span class="price-tag" data-flat-price="interview"></span></label>
+              <label class="opt"><input type="checkbox" name="addon" value="career" onchange="renderPaymentSummary()"> <span data-ar>إرشاد مهني (60 د)</span><span data-en>Career Coaching (60 min)</span> <span class="price-tag" data-flat-price="career"></span></label>
+            </div>
+          </div>
+
+          <p class="subhead" data-ar>خدمات إضافية</p>
+          <p class="subhead" data-en>Add-On Services</p>
+          <div class="field">
+            <div class="opt-grid">
+              <label class="opt"><input type="checkbox" name="addon" value="ats" onchange="renderPaymentSummary()"> <span data-ar>خدمة أنظمة تتبّع المتقدمين (ATS)</span><span data-en>ATS Optimization</span> <span class="price-tag" data-flat-price="ats"></span></label>
+              <label class="opt"><input type="checkbox" name="addon" value="coverletter" onchange="renderPaymentSummary()"> <span data-ar>خطاب تعريفي</span><span data-en>Cover Letter Writing</span> <span class="price-tag" data-flat-price="coverletter"></span></label>
+              <label class="opt"><input type="checkbox" name="addon" value="bio" onchange="renderPaymentSummary()"> <span data-ar>نبذة شخصية</span><span data-en>Biography Writing</span> <span class="price-tag" data-flat-price="bio"></span></label>
+              <label class="opt"><input type="checkbox" name="addon" value="translation" onchange="renderPaymentSummary()"> <span data-ar>ترجمة السيرة الذاتية</span><span data-en>Resume Translation</span> <span class="price-tag" data-flat-price="translation"></span></label>
+            </div>
+          </div>
+
+          <p class="subhead" data-ar>الباقات</p>
+          <p class="subhead" data-en>Bundles</p>
+          <!-- Decision 2026-10-18 "a": no Single/Bundle choice (same as the new-client form). The bundle tier
+               comes from the number of paid services and ADDS to the 5% returning-client discount. -->
+          <div class="field">
+            <div class="hint" style="margin:0 0 8px"><span data-ar>تُطبَّق الباقة تلقائيًا حسب عدد الخدمات التي تطلبها، وتُضاف إلى خصم 5% للعملاء الحاليين.</span><span data-en>Your bundle is applied automatically from the number of services you order, on top of your 5% returning-client discount.</span></div>
+            <div id="bundleTier" class="bundle-tier" data-tier="" aria-live="polite"></div>
+          </div>
+
+          <!-- 10-15 D13: delivery speed applies to Resume Writing only, so it is shown and required only when a resume is ordered. -->
+          <div id="deliveryField" style="display:none;">
+          <p class="subhead" data-ar>سرعة التسليم</p>
+          <p class="subhead" data-en>Delivery Speed</p>
+          <div class="field" data-required><label class="flabel"><span data-ar>سرعة التسليم</span><span data-en>Delivery Speed</span><span class="req">*</span></label>
+            <div class="hint" style="margin:0 0 8px"><span data-ar>تُحتسب من بداية مكالمتك الاستشارية. تنطبق على كتابة السيرة الذاتية فقط، وتُسلَّم بقية الخدمات خلال 1–2 يوم عمل.</span><span data-en>Counted from the start of your consultation call. Applies to Resume Writing only; all other services are delivered within 1–2 business days.</span></div>
+            <div class="opt-grid">
+              <label class="opt"><input type="radio" name="delivery" value="standard" onchange="renderPaymentSummary()"> <span data-ar>اعتيادي (5 أيام من بداية المكالمة)</span><span data-en>Standard (5 days from the consultation call)</span></label>
+              <label class="opt"><input type="radio" name="delivery" value="priority" onchange="renderPaymentSummary()"> <span data-ar>أولوية (3 أيام من بداية المكالمة) +25%</span><span data-en>Priority (3 days from the consultation call) +25%</span></label>
+              <label class="opt"><input type="radio" name="delivery" value="express" onchange="renderPaymentSummary()"> <span data-ar>عاجل (48 ساعة من بداية المكالمة) +40%</span><span data-en>Express (48 hours from the consultation call) +40%</span></label>
+            </div><div class="err-msg" data-ar>مطلوب</div><div class="err-msg" data-en>Required</div></div>
+          </div>
+        </div>
+        <div class="actions">
+          <button type="button" class="btn btn-ghost" onclick="goBack(3)"><span data-ar>السابق</span><span data-en>Back</span></button>
+          <button type="button" class="btn btn-primary" onclick="goNext(3)"><span data-ar>التالي</span><span data-en>Next</span></button>
+        </div>
+      </section>
+
+      <!-- ============ STEP 4: SUMMARY AND TERMS ============
+           Hold mode (2026-11-23): new paid services show the estimate and the Terms;
+           there is no payment step. Nothing is attached, no order: Submit sends one
+           summary to contact_messages. An update-only request has no price yet, so
+           it skips the Terms card. -->
+      <section class="panel" data-step="4">
+        <div class="card">
+          <h3><span data-ar>ملخص الطلب</span><span data-en>Request Summary</span></h3>
+          <div id="paySummary"></div>
+        </div>
+        <div class="card" id="termsCard" hidden>
+          <h3><span data-ar>الشروط والأحكام</span><span data-en>Terms &amp; Conditions</span></h3>
+          <div class="terms-box" id="termsBox" tabindex="0" role="region" aria-label="Terms &amp; Conditions"></div>
+          <p class="hint" id="termsScrollHint" style="margin-top:10px"><span data-ar>مرّر إلى الأسفل للمتابعة</span><span data-en>Scroll to the bottom to continue</span></p>
+          <label class="terms-agree"><input type="checkbox" id="termsAgree" disabled onchange="checkTermsScrolled()"><span><span data-ar>قرأت الشروط والأحكام وأوافق عليها</span><span data-en>I have read and agree to the Terms &amp; Conditions</span></span></label>
+          <p class="hint privacy-link" style="margin-top:10px"><a data-ar href="/?lang=ar#privacy">كيف نحافظ على خصوصية معلوماتك</a><a data-en href="/?lang=en#privacy">How we keep your information private</a></p>
+        </div>
+        <div class="actions">
+          <button type="button" class="btn btn-ghost" onclick="goBack(4)"><span data-ar>السابق</span><span data-en>Back</span></button>
+          <button type="submit" class="btn btn-primary" id="submitBtn"><span data-ar>إرسال</span><span data-en>Submit</span></button>
+        </div>
+      </section>
+    </form>
+  </div>
+
+  <div class="done-screen" id="sentScreen" role="status">
+    <div class="ico">&#10003;</div>
+    <p><span data-ar>وصل طلبك إلى كامن، وسنتواصل معك قريبًا.</span><span data-en>Kamin has your request and will contact you soon.</span></p>
+    <a class="btn btn-primary done-btn" href="/" data-home-link="1"><span data-ar>العودة إلى الموقع</span><span data-en>Back to the website</span></a>
+  </div>
+
+
+  <div class="err-msg" id="submitError" style="display:none; text-align:center; margin-top:16px;">
+    <span data-ar>حدث خطأ أثناء الإرسال. حاول مرة أخرى.</span><span data-en>Something went wrong submitting the form. Please try again.</span>
+  </div>
+  <div class="err-msg" id="tooFastError" role="alert" style="display:none; text-align:center; margin-top:16px;">
+    <span data-ar>وصلنا طلبك أسرع من المعتاد. راجع بياناتك ثم حاول مرة أخرى.</span><span data-en>That was quicker than we expected. Check your details, then please try again.</span>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="../assets/kamin-supabase.js"></script>
+<script src="../assets/kamin-prices.js"></script>
+<script src="../assets/kamin-errors.js"></script>
+<script src="../assets/kamin-terms.js"></script>
+<script src="../assets/kamin-lang.js"></script>
+<script src="../assets/kamin-fields.js"></script>
+<script src="../assets/kamin-guard.js"></script>
+<script>
+  /* -------- prices: read from the database (public.price_list, pending 26)
+     at start. No hard-coded fallback: if the list can't load, the form
+     says so and refuses to submit. -------- */
+  var PRICES = {};
+  var FLAT_PRICES = {};
+  var MEMBERSHIP_PRICE = null;
+  var priceState = 'loading'; // loading | ready | failed
+  var ADDON_PRICES = FLAT_PRICES;
+  var ADDON_LABELS = {
+    interview: { en: 'Interview Coaching', ar: 'تدريب مقابلات' },
+    career: { en: 'Career Coaching', ar: 'إرشاد مهني' },
+    ats: { en: 'ATS Optimization', ar: 'خدمة أنظمة تتبّع المتقدمين (ATS)' },
+    coverletter: { en: 'Cover Letter Writing', ar: 'خطاب تعريفي' },
+    bio: { en: 'Biography Writing', ar: 'نبذة شخصية' },
+    translation: { en: 'Resume Translation', ar: 'ترجمة السيرة الذاتية' }
+  };
+  var TIERS = [];   // [{ item, name, minServices, percent }] from public.price_list
+  var SPEED = {};    // { priority: { name, percent, appliesTo }, express: ... }
+  var TIER_AR = { gold: 'الباقة الذهبية', platinum: 'الباقة البلاتينية', diamond: 'الباقة الماسية' }; // website wording
+  var SPEED_AR = { priority: 'أولوية', express: 'عاجل' };
+  // Decision 2026-10-18 "a": ADDS to the bundle tier percent (5+5, 5+8, 5+10), never replaced by it.
+  var RETURNING_DISCOUNT_PCT = 5;
+
+
+  function fmtPrice(n){ return n.toLocaleString() + ' <span class="sar"></span>'; }
+  function currentTier(){ var t = document.querySelector('input[name="tier"]:checked'); return t ? t.value : null; }
+
+  function renderTier(){
+    var tier = currentTier();
+    document.querySelectorAll('.price-tag[data-price]').forEach(function(el){
+      var key = el.getAttribute('data-price');
+      el.innerHTML = (tier && PRICES[key] && PRICES[key][tier] != null) ? fmtPrice(PRICES[key][tier]) : '';
+    });
+    renderPaymentSummary();
+  }
+  function toggleResumeLang(){
+    var yes = document.querySelector('input[name="resumeWriting"]:checked');
+    document.getElementById('resumeLangField').style.display = (yes && yes.value === 'yes') ? 'block' : 'none';
+    document.getElementById('deliveryField').style.display = (yes && yes.value === 'yes') ? '' : 'none';
+    renderPaymentSummary();
+  }
+  function toggleWrittenUpdates(){
+    var mode = document.querySelector('input[name="workingMode"]:checked');
+    document.getElementById('writtenUpdatesField').style.display = (mode && mode.value === 'written') ? 'block' : 'none';
+  }
+
+  /* -------- routing: steps 2 (Update) and 3 (New Services) are each
+     only shown if their checkbox is checked; step 4 always runs. -------- */
+  function wantsUpdate(){ return document.getElementById('routeUpdate').checked; }
+  function wantsNew(){ return document.getElementById('routeNew').checked; }
+
+  // Required and format checks: ../assets/kamin-fields.js (errors show on
+  // Next for this step's visible fields and clear as each is fixed).
+  function validateStep(n){
+    var panel = document.querySelector('.panel[data-step="' + n + '"]');
+    var ok = KaminFields.validatePanel(panel);
+    // Step 3's tier/resume/linkedin/portfolio/delivery are only truly
+    // required when the New Services route is active.
+    if (n === 3 && wantsNew()){
+      ['tier','resumeWriting','linkedinOpt','portfolioDev'].forEach(function(name){
+        if (!document.querySelector('input[name="' + name + '"]:checked')) ok = false;
+      });
+      if (isYes('resumeWriting') && !document.querySelector('input[name="delivery"]:checked')) ok = false;
+    }
+    return ok;
+  }
+
+  KaminFields.watch(document.getElementById('returningForm'));
+
+  function showStep(n){
+    document.querySelectorAll('.panel').forEach(function(p){ p.classList.toggle('active', p.getAttribute('data-step') == n); });
+    [1,2,3,4].forEach(function(i){
+      document.getElementById('dot' + i).classList.toggle('active', i == n);
+      document.getElementById('dot' + i).classList.toggle('done', i < n);
+    });
+    var LABELS = {
+      1: { ar: 'ماذا تحتاج؟', en: 'What you need' },
+      2: { ar: 'التحديث', en: 'Update' },
+      3: { ar: 'الخدمة الجديدة', en: 'New Service' },
+      4: { ar: 'ملخص الطلب', en: 'Summary' }
+    };
+    document.getElementById('stepLabel').innerHTML =
+      '<b data-ar>' + n + ' من 4</b><b data-en>' + n + ' of 4</b>: <span data-ar>' + LABELS[n].ar + '</span><span data-en>' + LABELS[n].en + '</span>';
+    applyLang(document.documentElement.lang);
+    if (n == 3) renderTier();
+    if (n == 4){ renderPaymentSummary(); renderPayStep(); }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function goNext(from){
+    if (!validateStep(from)) return;
+    if (from === 1){
+      showStep(wantsUpdate() ? 2 : (wantsNew() ? 3 : 4));
+    } else if (from === 2){
+      showStep(wantsNew() ? 3 : 4);
+    } else if (from === 3){
+      showStep(4);
+    }
+  }
+  function goBack(from){
+    if (from === 4){
+      showStep(wantsNew() ? 3 : (wantsUpdate() ? 2 : 1));
+    } else if (from === 3){
+      showStep(wantsUpdate() ? 2 : 1);
+    } else if (from === 2){
+      showStep(1);
+    }
+  }
+
+  /* -------- order + payment summary: the same rules and look as new-client-form.html's
+     computeOrder / renderPaymentSummary (2c0b893, 47fd562), plus decision 2026-10-18 "a":
+     ONE combined percentage = RETURNING_DISCOUNT_PCT + the bundle tier's percent, on every
+     service line (5+5=10, 5+8=13, 5+10=15). The tier comes from the count of paid services
+     (every service and add-on counts; membership does not). Delivery fee: the speed percent
+     of the resume price AFTER the discount. Membership is never discounted. Halala precision.
+     The server does not price returning orders (service_requests insert, no quote_order). */
+  function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function money(n){ return Math.round(n * 100) / 100; }
+  function fmtMoney(n){ return n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' <span class="sar"></span>'; }
+  function isYes(name){ var el = document.querySelector('input[name="' + name + '"]:checked'); return !!(el && el.value === 'yes'); }
+
+  function computeOrder(){
+    var tier = currentTier();
+    var lines = [];
+    [['resumeWriting', 'Resume Writing', 'إعداد السيرة الذاتية'], ['linkedinOpt', 'LinkedIn Optimization', 'تطوير ملف لينكدإن'], ['portfolioDev', 'Portfolio Development', 'تطوير ملف الأعمال']].forEach(function(s){
+      if (isYes(s[0]) && tier && PRICES[s[0]] && PRICES[s[0]][tier] != null) lines.push({ en: s[1], ar: s[2], amt: PRICES[s[0]][tier] });
+    });
+    document.querySelectorAll('input[name="addon"]:checked').forEach(function(cb){
+      lines.push({ en: ADDON_LABELS[cb.value].en, ar: ADDON_LABELS[cb.value].ar, amt: ADDON_PRICES[cb.value] });
+    });
+    var subtotal = money(lines.reduce(function(t, l){ return t + l.amt; }, 0));
+    var bundle = null;
+    TIERS.forEach(function(b){ if (lines.length >= b.minServices) bundle = b; });
+    var pct = lines.length ? RETURNING_DISCOUNT_PCT + (bundle ? bundle.percent : 0) : 0;
+    var discount = pct ? money(subtotal * pct / 100) : 0;
+    // A price after the discount, in whole halalas (integer maths, no float drift).
+    function netCents(amt){ return Math.round(Math.round(amt * 100) * (100 - pct) / 100); }
+    lines.forEach(function(l){ l.net = netCents(l.amt) / 100; });
+    var resumeOn = isYes('resumeWriting');
+    var d = document.querySelector('input[name="delivery"]:checked');
+    var speed = resumeOn && d ? d.value : null;
+    var sp = speed && SPEED[speed];
+    var base = sp && tier && PRICES[sp.appliesTo] ? PRICES[sp.appliesTo][tier] : null;
+    var fee = base != null ? Math.round(netCents(base) * sp.percent / 100) / 100 : 0;
+    var membershipFee = isYes('membershipAdd') ? MEMBERSHIP_PRICE : 0;
+    return { lines: lines, count: lines.length, subtotal: subtotal, tier: bundle, pct: pct, discount: discount,
+      resumeOn: resumeOn, speed: speed, fee: fee, membershipFee: membershipFee,
+      total: money(subtotal - discount + fee + membershipFee) };
+  }
+
+  function arCount(n){ return n === 1 ? 'خدمة واحدة' : n === 2 ? 'خدمتان' : n <= 10 ? n + ' خدمات' : n + ' خدمة'; }
+  function renderBundleTier(o, lang){
+    var el = document.getElementById('bundleTier');
+    if (!el) return;
+    var ar = lang === 'ar';
+    el.dataset.tier = o.tier ? o.tier.item : '';
+    el.classList.toggle('on', !!o.tier);
+    if (o.tier){
+      var name = ar ? (TIER_AR[o.tier.item] || esc(o.tier.name)) : esc(o.tier.name);
+      el.innerHTML = '<span><span class="t-name">' + name + '</span><span class="t-lock">' +
+        (ar ? 'تُطبَّق تلقائيًا (' + arCount(o.count) + ')، إضافةً إلى خصم <bdi dir="ltr">' + RETURNING_DISCOUNT_PCT + '%</bdi> للعملاء الحاليين'
+            : 'Applied automatically (' + o.count + ' services), on top of your ' + RETURNING_DISCOUNT_PCT + '% returning-client discount') +
+        '</span></span><span class="t-pct" dir="ltr">-' + o.tier.percent + '%</span>';
+    } else {
+      var first = TIERS[0];
+      el.innerHTML = '<span>' + (first ? (ar ? 'لا توجد باقة بعد: اطلب ' + (first.minServices === 2 ? 'خدمتين' : first.minServices + ' خدمات') + ' أو أكثر للحصول على خصم الباقة.' : 'No bundle yet: order ' + first.minServices + ' or more services for a bundle discount.') : '') + '</span>';
+    }
+  }
+
+  function renderPaymentSummary(){
+    var container = document.getElementById('paySummary');
+    if (!container) return;
+    var lang = document.documentElement.lang;
+    var ar = lang === 'ar';
+    if (!wantsNew()){
+      container.innerHTML = '<p class="hint">' + (ar
+        ? 'هذا طلب تحديث فقط. لا يوجد مبلغ جديد لعرضه هنا. سيتواصل معك فريقنا لتأكيد نطاق التحديث.'
+        : 'This is an update-only request. Nothing new to price here. Our team will confirm the update scope with you.') + '</p>';
+      return;
+    }
+    if (priceState !== 'ready'){ container.innerHTML = ''; return; }
+    var o = computeOrder();
+    renderBundleTier(o, lang);
+    var row = function(label, amt, cls){ return '<div class="pay-row' + (cls ? ' ' + cls : '') + '"><span>' + label + '</span><span dir="ltr">' + amt + '</span></div>'; };
+    var sec = function(key, en, a){ return '<div class="pay-section" data-section="' + key + '">' + (ar ? a : en) + '</div>'; };
+
+    var html = sec('services', 'Services', 'الخدمات');
+    html += o.lines.map(function(l){
+      return row(ar ? l.ar : l.en, l.net !== l.amt ? '<s>' + fmtMoney(l.amt) + '</s><span class="now">' + fmtMoney(l.net) + '</span>' : fmtMoney(l.amt), 'svc');
+    }).join('');
+    // Decision 2026-10-18 "b" (as the new form): the Subtotal is the discounted one; the discount is named once.
+    html += row(ar ? 'المجموع الفرعي' : 'Subtotal', fmtMoney(money(o.subtotal - o.discount)), 'sub');
+    var R = RETURNING_DISCOUNT_PCT, note = null;
+    if (o.discount && o.tier) note = { en: 'Includes returning-client ' + R + '% + ' + esc(o.tier.name) + ' ' + o.tier.percent + '% (−' + o.pct + '%)',
+      ar: 'تشمل خصم العميل الحالي <bdi dir="ltr">' + R + '%</bdi> + ' + (TIER_AR[o.tier.item] || esc(o.tier.name)) + ' <bdi dir="ltr">' + o.tier.percent + '%</bdi> (<bdi dir="ltr">−' + o.pct + '%</bdi>)' };
+    else if (o.discount) note = { en: 'Includes returning-client discount (−' + R + '%)', ar: 'تشمل خصم العميل الحالي (<bdi dir="ltr">−' + R + '%</bdi>)' };
+    if (note) html += '<p class="pay-note">' + (ar ? note.ar : note.en) + '</p>';
+
+    if (o.resumeOn){
+      html += sec('delivery', 'Delivery', 'التسليم');
+      if (o.speed && o.speed !== 'standard' && SPEED[o.speed]){
+        html += row(ar ? (SPEED_AR[o.speed] || esc(SPEED[o.speed].name)) + ' (السيرة الذاتية) <bdi dir="ltr">+' + SPEED[o.speed].percent + '%</bdi>'
+                       : esc(SPEED[o.speed].name) + ' (Resume) +' + SPEED[o.speed].percent + '%', '+' + fmtMoney(o.fee));
+      } else if (o.speed === 'standard'){
+        html += row(ar ? 'اعتيادي: بدون رسوم' : 'Standard: no fee', fmtMoney(0));
+      } else {
+        html += row(ar ? 'اختر سرعة التسليم' : 'Choose a delivery speed', '');
+      }
+    }
+    if (o.membershipFee > 0){
+      html += sec('membership', 'Membership', 'العضوية');
+      html += row(ar ? 'عضوية كامن السنوية' : 'Kamin Annual Membership', fmtMoney(o.membershipFee));
+    }
+    html += '<div class="pay-row total" data-section="total"><span>' + (ar ? 'الإجمالي' : 'Total') + '</span><span dir="ltr">' + fmtMoney(o.total) + '</span></div>';
+    container.innerHTML = o.lines.length || o.membershipFee ? html : ('<p class="hint">' + (ar ? 'اختر خدماتك في الخطوة السابقة لعرض الملخص.' : 'Select your services in the previous step to see a summary.') + '</p>');
+  }
+
+  function showPricesError(){
+    var el = document.getElementById('pricesError');
+    if (el) el.style.display = 'block';
+    document.querySelectorAll('#returningForm button[type="submit"]').forEach(function(b){ b.disabled = true; });
+  }
+  function renderFlatPrices(){
+    document.querySelectorAll('[data-flat-price]').forEach(function(el){
+      var key = el.getAttribute('data-flat-price');
+      var amt = key === 'membership' ? MEMBERSHIP_PRICE : FLAT_PRICES[key];
+      el.innerHTML = amt != null ? amt.toLocaleString() + '<span class="sar"></span>' : '';
+    });
+  }
+  kaminPrices.load().then(function(p){
+    PRICES = p.services;
+    FLAT_PRICES = ADDON_PRICES = p.flat;
+    MEMBERSHIP_PRICE = p.membership;
+    TIERS = p.bundles;
+    SPEED = p.speed;
+    priceState = 'ready';
+    renderFlatPrices();
+    renderTier();
+  }).catch(function(err){
+    priceState = 'failed';
+    showPricesError();
+    if (window.console) console.error('price list failed to load', err);
+  });
+
+  /* -------- Terms (hold mode, 2026-11-23: no payment step) --------
+     New paid services: the Terms are read and ticked. Nothing is uploaded and
+     no order is written: Submit sends one summary (below). */
+  var termsScrolled = false;
+
+  function needsPayment(){ return wantsNew(); }
+  function renderPayStep(){
+    var pay = needsPayment();
+    document.getElementById('termsCard').hidden = !pay;
+    if (pay){ renderTerms(); checkTermsScrolled(); }
+    updatePayButton();
+  }
+  function renderTerms(){
+    var box = document.getElementById('termsBox');
+    if (!box || box.childElementCount || !window.KAMIN_TERMS) return;
+    ['en', 'ar'].forEach(function(l){
+      var t = window.KAMIN_TERMS[l];
+      var wrap = document.createElement('div');
+      wrap.setAttribute('data-' + l, '');
+      function add(parent, tag, text){ var el = document.createElement(tag); el.textContent = text; parent.appendChild(el); return el; }
+      add(wrap, 'h4', t.title);
+      t.sections.forEach(function(sec){
+        add(wrap, 'h5', sec.heading);
+        var ul = add(wrap, 'ul', '');
+        sec.items.forEach(function(it){ add(ul, 'li', it); });
+      });
+      add(wrap, 'h5', t.confidentialityTitle);
+      add(wrap, 'p', t.confidentialityBody);
+      box.appendChild(wrap);
+    });
+    box.addEventListener('scroll', checkTermsScrolled, { passive: true });
+  }
+  function checkTermsScrolled(){
+    var box = document.getElementById('termsBox');
+    if (box.scrollTop + box.clientHeight >= box.scrollHeight - 4) termsScrolled = true;
+    var agree = document.getElementById('termsAgree');
+    agree.disabled = !termsScrolled;
+    if (!termsScrolled) agree.checked = false;
+    document.getElementById('termsScrollHint').style.display = termsScrolled ? 'none' : '';
+    updatePayButton();
+  }
+  function payReady(){
+    if (!needsPayment()) return true;
+    return priceState === 'ready' && document.getElementById('termsAgree').checked;
+  }
+  function updatePayButton(){
+    document.getElementById('submitBtn').disabled = holdSending || !payReady();
+  }
+
+  /* -------- hold mode (2026-11-15 option b; no payment step, 2026-11-23) --------
+     No login, order, upload or update request. On submit the answers become ONE
+     plain-text summary (English labels, the client's values as typed, the price
+     summary as shown, the estimated total, the form language) and ONE row goes into
+     contact_messages (anon may insert, not read, so no .select()); its trigger sends
+     the "New website message" email. Same pattern as new-client-form.html. */
+  var HOLD_MAX = 5000;
+  var HOLD_MARK = ' [shortened]';
+  function holdClean(s){ return String(s || '').replace(/\s+/g, ' ').trim(); }
+  function holdLabel(field){
+    var el = field.querySelector('.flabel [data-en]');
+    return el ? holdClean(el.textContent) : '';
+  }
+  function holdOptionText(input){
+    var lab = input.closest('label');
+    var en = lab && lab.querySelector('[data-en]');
+    return en ? holdClean(en.textContent) : input.value;
+  }
+  function holdFieldValue(field){
+    var vals = [];
+    field.querySelectorAll('input[name], select[name], textarea[name]').forEach(function(c){
+      if (c.name === 'kx_hp') return;
+      if (c.type === 'radio' || c.type === 'checkbox'){ if (c.checked) vals.push(holdOptionText(c)); return; }
+      if (c.tagName === 'SELECT'){
+        var o = c.options[c.selectedIndex];
+        if (o && o.value) vals.push(o.getAttribute('data-t-en') || (o.textContent.split(' | ')[1] || o.textContent).trim());
+        return;
+      }
+      var v = String(c.value || '').trim();
+      if (v) vals.push(v);
+    });
+    return vals.join(', ');
+  }
+  // The price summary exactly as the form shows it, read in English.
+  function holdPriceLines(){
+    var lang = document.documentElement.lang;
+    if (lang !== 'en'){ document.documentElement.lang = 'en'; renderPaymentSummary(); }
+    var out = [];
+    document.querySelectorAll('#paySummary .pay-section, #paySummary .pay-row, #paySummary .pay-note, #paySummary .hint').forEach(function(el){
+      if (el.classList.contains('pay-row')){
+        var c = el.children, amt = c[1] ? holdClean((c[1].querySelector('.now') || c[1]).textContent) : '';
+        out.push(holdClean(c[0].textContent) + (amt ? ': ' + amt + ' SAR' : ''));
+      } else out.push(holdClean(el.textContent));
+    });
+    if (lang !== 'en'){ document.documentElement.lang = lang; renderPaymentSummary(); }
+    return out;
+  }
+  function holdTotalLine(){
+    if (!needsPayment()) return 'Estimated total: none yet (update-only request, Kamin will price it)';
+    var o = computeOrder();
+    return 'Estimated total: ' + holdClean(fmtMoney(o.total).replace(/<[^>]*>/g, '')) + ' SAR';
+  }
+  // Answers in form order. Free-text answers are the only ones ever shortened,
+  // longest first, each marked; none is dropped.
+  function buildHoldSummary(form){
+    var answers = [];
+    form.querySelectorAll('.panel .field').forEach(function(f){
+      if (f.closest('[hidden]') || getComputedStyle(f).display === 'none') return;
+      var label = holdLabel(f), value = holdFieldValue(f);
+      if (label && value) answers.push({ label: label, value: value, full: value, free: !!f.querySelector('textarea, input[type="text"]') });
+    });
+    var tail = ['Services and prices:'].concat(holdPriceLines(), [holdTotalLine(), 'Form language: ' + (document.documentElement.lang === 'ar' ? 'Arabic' : 'English')]);
+    function text(){ return ['Returning client form'].concat(answers.map(function(a){ return a.label + ': ' + a.value; }), tail).join('\n'); }
+    var t = text();
+    var guard = 0;
+    while (t.length > HOLD_MAX && guard++ < 50){
+      var longest = answers.filter(function(a){ return a.free; }).sort(function(a, b){ return b.value.length - a.value.length; })[0];
+      if (!longest || longest.value.length <= HOLD_MARK.length + 20) break;
+      var keep = Math.max(20, longest.value.length - HOLD_MARK.length - (t.length - HOLD_MAX));
+      longest.value = longest.full.slice(0, keep).trim() + HOLD_MARK;
+      t = text();
+    }
+    return t.slice(0, HOLD_MAX);
+  }
+  function holdRow(form){
+    var fd = new FormData(form);
+    var cut = function(v, n){ return String(v || '').trim().slice(0, n); };
+    return {
+      name: cut(fd.get('fullName'), 200),
+      email: cut(fd.get('email'), 320),
+      phone: cut(fd.get('mobile'), 40) || null,
+      reason: 'Returning client form',
+      message: buildHoldSummary(form),
+      lang: document.documentElement.lang === 'ar' ? 'ar' : 'en'
+    };
+  }
+  function showSentScreen(){
+    document.getElementById('formRoot').style.display = 'none';
+    document.getElementById('sentScreen').classList.add('active');
+    window.scrollTo({ top: 0 });
+  }
+
+  var holdSending = false;
+  var intakeGuard = kaminFormGuard(document.getElementById('returningForm'));
+  document.getElementById('returningForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    if (holdSending) return;
+    if (priceState !== 'ready'){ showPricesError(); return; }
+    if (!validateStep(4)) return;
+    if (!payReady()){ checkTermsScrolled(); return; }
+    var form = document.getElementById('returningForm');
+    var submitBtn = document.getElementById('submitBtn');
+    var errEl = document.getElementById('submitError');
+    var fastEl = document.getElementById('tooFastError');
+    errEl.style.display = 'none';
+    fastEl.style.display = 'none';
+    var verdict = intakeGuard.verdict();
+    if (verdict === 'too-fast'){ fastEl.style.display = 'block'; return; }
+    if (verdict === 'bot'){ showSentScreen(); return; }
+
+    holdSending = true;
+    submitBtn.disabled = true;
+    var label = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<span data-ar>جارٍ الإرسال...</span><span data-en>Sending...</span>';
+    applyLang(document.documentElement.lang);
+    (async function(){
+      try {
+        var res = await window.kaminPublicSupabase().from('contact_messages').insert(holdRow(form));
+        if (res.error) throw res.error;
+        showSentScreen();
+      } catch (err){
+        console.error('Kamin returning-client-form submit failed:', err);
+        if (window.kaminReportError) window.kaminReportError('returning-submit', err);
+        errEl.style.display = 'block';
+      } finally {
+        holdSending = false;
+        submitBtn.innerHTML = label;
+        applyLang(document.documentElement.lang);
+        updatePayButton();
+      }
+    })();
+  });
+
+  function applyLang(lang){
+    document.documentElement.lang = lang;
+    document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+    document.getElementById('langToggle').textContent = lang === 'ar' ? 'English' : 'العربية';
+    if (window.kaminLangOnly) window.kaminLangOnly(lang);
+  }
+  function toggleLang(){ applyLang(document.documentElement.lang === 'ar' ? 'en' : 'ar'); kaminRememberLang(document.documentElement.lang); }
+
+  // Hold mode: any visitor may use the form; there is no login and no account lookup.
+  applyLang(kaminStartLang('ar'));
+</script>
+</body>
+</html>

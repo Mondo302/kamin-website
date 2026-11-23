@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>قصة يستحقها من تحب | A Story Worth Gifting | Kamin</title>
+<meta name="description" content="نؤمن أن أجمل الهدايا هي التي تُحدث فرقًا حقيقيًا في مسيرة من نُحب. We believe the most meaningful gifts are the ones that shape someone's future.">
+<meta property="og:title" content="قصة يستحقها من تحب | A Story Worth Gifting | Kamin">
+<meta property="og:description" content="نؤمن أن أجمل الهدايا هي التي تُحدث فرقًا حقيقيًا في مسيرة من نُحب. We believe the most meaningful gifts are the ones that shape someone's future.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Kamin">
+
+<!--
+  Kamin: Gift Form. Same design system and pattern as new-client-form.html;
+  prices come from public.price_list (assets/kamin-prices.js).
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,500&family=Jost:wght@300;400;500;600;700&family=Amiri:wght@400;700&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --navy:#101B24; --navy-1:#1B2530; --navy-2:#16232E; --navy-3:#1E2E3A;
+    --gold:#C6A15E; --gold-1:#D4AF6A; --gold-2:#E3C88A; --gold-3:#DCC08A;
+    --gold-4:#B8935A; --gold-5:#8B6B3E;
+    --cream:#FCFAF6; --cream-1:#F6F1E9; --cream-2:#F3EFE7; --cream-3:#EFE8DB;
+    --cream-4:#E8E4DB; --cream-5:#D9CFBB;
+    --gray-1:#AEB8BF; --gray-2:#C7CFD5; --gray-3:#D8DEE3; --gray-4:#8B95A0;
+    --gray-5:#7C858F; --gray-6:#5F6870; --err:#B23A3A;
+    --font-ar-display:'Amiri', serif; --font-ar-body:'IBM Plex Sans Arabic', sans-serif;
+    --font-en-display:'Cormorant Garamond', serif; --font-en-body:'Jost', sans-serif;
+  }
+  *{box-sizing:border-box;} html{scroll-behavior:smooth;}
+  body{ margin:0; background:var(--cream); color:var(--navy); font-family:var(--font-ar-body); line-height:1.7; position:relative; }
+  /* ---- ambient glow behind the frosted cards (glassmorphism pass, 2026-09-17), same technique as new-client-form.html ---- */
+  body::before{
+    content:''; position:fixed; inset:0; z-index:-1; pointer-events:none;
+    background:
+      radial-gradient(680px 420px at 14% -8%, rgba(198,161,94,.16), transparent 60%),
+      radial-gradient(520px 360px at 100% 10%, rgba(198,161,94,.09), transparent 65%),
+      var(--cream);
+  }
+  html[lang="en"] body{ font-family:var(--font-en-body); }
+  h1,h2,h3,.display{ font-family:var(--font-ar-display); font-weight:700; }
+  html[lang="en"] h1, html[lang="en"] h2, html[lang="en"] h3, html[lang="en"] .display{ font-family:var(--font-en-display); font-weight:600; }
+
+  .nav{ position:sticky; top:0; z-index:50; background:rgba(16,27,36,.9); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+    border-bottom:1px solid rgba(198,161,94,.22); padding:16px 28px; display:flex; align-items:center; justify-content:space-between; }
+  .nav .word{ color:var(--gold); font-family:var(--font-ar-display); font-size:22px; letter-spacing:.04em; }
+  html[lang="en"] .nav .word{ font-family:var(--font-en-display); }
+  .langbtn{ background:transparent; border:1px solid var(--gold-3); color:var(--gold-2); border-radius:20px; padding:6px 16px; font-size:13px; cursor:pointer; font-family:inherit; }
+  .langbtn:hover{ background:rgba(198,161,94,.12); }
+
+  .wrap{ max-width:720px; margin:0 auto; padding:48px 20px 100px; }
+  .kicker{ color:var(--gold-4); font-size:13px; letter-spacing:.06em; margin:0 0 10px; }
+  h1{ font-size:34px; line-height:1.25; margin:0 0 14px; color:var(--navy); }
+  .lede{ color:var(--gray-6); font-size:16px; max-width:56ch; margin:0 0 6px; }
+  .meta-line{ color:var(--gray-5); font-size:13.5px; margin:24px 0 0; }
+
+  .steps{ display:flex; gap:8px; margin:32px 0 28px; }
+  .step-dot{ flex:1; height:4px; border-radius:2px; background:var(--cream-5); }
+  .step-dot.done, .step-dot.active{ background:var(--gold); }
+  .step-label{ font-size:13px; color:var(--gray-5); margin-bottom:24px; } .step-label b{ color:var(--navy); }
+
+  .panel{ display:none; } .panel.active{ display:block; animation:fade .25s ease; }
+  @keyframes fade{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;} }
+  .subpanel{ display:none; } .subpanel.active{ display:block; }
+
+  .card{ background:rgba(255,255,255,.62); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); border:1px solid rgba(198,161,94,.22); border-radius:10px; padding:24px; margin-bottom:16px; box-shadow:0 1px 0 rgba(255,255,255,.6) inset, 0 16px 40px -24px rgba(16,27,36,.25); }
+  .card h3{ font-size:19px; margin:0 0 4px; color:var(--navy); }
+  .card .hint{ font-size:13.5px; color:var(--gray-5); margin:0 0 16px; }
+
+  .field{ margin-bottom:18px; } .field:last-child{ margin-bottom:0; }
+  label.flabel{ display:block; font-size:14px; font-weight:600; color:var(--navy-1); margin-bottom:7px; }
+  .req{ color:var(--err); margin-inline-start:3px; }
+  input[type="text"], input[type="email"], input[type="tel"], input[type="url"], input[type="date"],
+  select, textarea{ width:100%; padding:11px 13px; border:1px solid var(--gray-2); border-radius:7px;
+    font-size:15px; font-family:inherit; background:var(--cream); color:var(--navy); }
+  input:focus, select:focus, textarea:focus{ outline:none; border-color:var(--gold); box-shadow:0 0 0 3px rgba(198,161,94,.18); }
+  textarea{ min-height:90px; resize:vertical; }
+
+  .opt-grid{ display:flex; flex-wrap:wrap; gap:10px; }
+  .opt{ display:flex; align-items:center; gap:8px; border:1px solid var(--gray-2); border-radius:8px;
+    padding:10px 14px; cursor:pointer; font-size:14.5px; background:var(--cream); transition:.15s; }
+  .opt:has(input:checked){ border-color:var(--gold); background:rgba(198,161,94,.12); }
+  .opt input{ accent-color:var(--gold-5); }
+  .price-tag{ color:var(--gold-5); font-weight:600; margin-inline-start:6px; }
+  .decline{ color:var(--gray-5); font-size:13.5px; }
+
+  .policy-card{ background:var(--cream-2); border:1px solid var(--cream-5); border-radius:10px; padding:22px; font-size:14px; color:var(--navy-1); }
+  .policy-card ul{ margin:0; padding-inline-start:20px; line-height:2.1; }
+  .policy-card b{ color:var(--navy); }
+
+  .actions{ display:flex; justify-content:space-between; gap:12px; margin-top:28px; }
+  button.btn{ font-family:inherit; font-size:15px; font-weight:600; border-radius:8px; padding:13px 26px; cursor:pointer; border:1px solid transparent; }
+  .btn-primary{ background:var(--navy); color:var(--cream); } .btn-primary:hover{ background:var(--navy-3); }
+  .btn-primary:disabled{ opacity:.45; cursor:not-allowed; }
+  .btn-ghost{ background:transparent; border-color:var(--gray-2); color:var(--gray-6); } .btn-ghost:hover{ border-color:var(--gray-4); }
+
+  .err-msg{ color:var(--err); font-size:13px; margin-top:6px; display:none; }
+  .field.invalid .err-msg{ display:block; }
+  .field.invalid input, .field.invalid select, .field.invalid textarea{ border-color:var(--err); }
+
+  .done-screen{ display:none; text-align:center; padding:60px 20px; } .done-screen.active{ display:block; }
+  .done-screen .ico{ font-size:44px; color:var(--gold); margin-bottom:12px; }
+
+  [data-en]{ display:none; }
+  html[lang="en"] [data-ar]{ display:none; }
+  html[lang="en"] [data-en]{ display:inline; }
+  html[lang="en"] [data-en].block{ display:block; }
+  /* Same fix as the intake form (2026-09-17): the generic inline rule above
+     would jam the English kicker/h1/lede into one run; block tags stay block.
+     .err-msg lines keep their own higher-specificity show/hide rules below. */
+  html[lang="en"] h1[data-en], html[lang="en"] h2[data-en], html[lang="en"] h3[data-en],
+  html[lang="en"] p[data-en], html[lang="en"] div[data-en]{ display:block; }
+
+  /* ---- real Saudi Riyal symbol (SAMA, 2025) — same asset/pattern as
+     new-client-form.html, copied verbatim, not touching that file. ---- */
+  .sar{
+    display:inline-block; width:0.78em; height:0.78em; background-color:currentColor;
+    -webkit-mask-image:url(data:image/png;base64,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); -webkit-mask-size:contain;
+    -webkit-mask-repeat:no-repeat; -webkit-mask-position:center; -webkit-mask-mode:alpha;
+    mask-image:url(data:image/png;base64,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); mask-size:contain;
+    mask-repeat:no-repeat; mask-position:center; mask-mode:alpha;
+    vertical-align:-0.1em; margin-inline-start:3px;
+  }
+
+
+  /* ---- mobile (added 2026-09-21, deepened same day) ----
+     Clients fill these in on a phone, one-handed, often from a WhatsApp
+     link. Beyond fitting the screen: 44px touch targets, safe-area
+     padding for notched phones, and 16px fields so iOS stops zooming. */
+  html{ -webkit-text-size-adjust:100%; text-size-adjust:100%; }
+
+  @media (max-width: 640px){
+    input, select, textarea{ font-size:16px; min-height:44px; }
+    textarea{ min-height:96px; }
+
+    /* Radio and checkbox rows are the most-tapped things on these forms */
+    .opt, label.opt, .bundle-opt{ min-height:44px; display:flex; align-items:center; }
+
+    .wrap, .card, .panel, .sheet{
+      padding-left:calc(16px + env(safe-area-inset-left));
+      padding-right:calc(16px + env(safe-area-inset-right));
+    }
+    h1{ font-size:24px; line-height:1.25; }
+    h2{ font-size:19px; }
+    .opt-grid, .grid, .two-col{ grid-template-columns:1fr !important; }
+
+    /* Step buttons: full width, stacked, primary action under the thumb */
+    .actions{
+      flex-direction:column-reverse; gap:10px;
+      padding-bottom:calc(8px + env(safe-area-inset-bottom));
+    }
+    .actions button, .actions .btn{ width:100%; min-height:48px; font-size:15px; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:.01ms !important; transition-duration:.01ms !important; }
+  }
+  /* Error lines per language (fixed 2026-09-26): the language toggle rule
+     html[lang="en"] [data-en]{display:inline} outranked .err-msg{display:none},
+     so in English every "Required" line showed from page load, and an
+     invalid field in Arabic also showed its English line. Hidden until the
+     field is invalid, and only in the page language. */
+  html[lang] body .err-msg[data-en], html[lang] body .err-msg[data-ar]{ display:none; }
+  html[lang="en"] body .field.invalid .err-msg[data-en]{ display:block; }
+  html:not([lang="en"]) body .field.invalid .err-msg[data-ar]{ display:block; }
+  .done-screen .done-btn{ display:inline-flex; align-items:center; justify-content:center; min-height:44px; margin-top:20px; padding:12px 26px; border-radius:8px; border:1px solid transparent; background:var(--navy); color:var(--cream); font-family:inherit; font-size:15px; font-weight:600; text-decoration:none; }
+  .done-screen .done-btn:hover{ background:var(--navy-3); }
+  .done-screen .done-btn:focus-visible{ outline:2px solid var(--gold); outline-offset:2px; }
+
+  /* ---- pay step, copied verbatim from returning-client-form.html (2026-10-18) ---- */
+  .pay-row{ display:flex; justify-content:space-between; padding:9px 0; border-top:1px solid var(--cream-2); font-size:14.5px; }
+  .pay-row:first-of-type{ border-top:none; }
+  .pay-row.discount span:last-child{ color:#2E7D32; }
+  .pay-row.total{ border-top:2px solid var(--navy); margin-top:6px; padding-top:14px; font-size:18px; font-weight:700; }
+  .pay-note{ font-size:12px; color:var(--gray-5); margin-top:14px; }
+  /* Same as new-client-form.html: struck old price + green discounted price, sections, automatic bundle tier. */
+  .pay-row.svc s{ color:var(--gray-5); text-decoration:line-through; margin-inline-end:6px; }
+  .pay-row.svc .now{ color:#2E7D32; }
+  .pay-row.sub{ font-weight:600; }
+  .pay-section{ font-size:11.5px; letter-spacing:.08em; text-transform:uppercase; font-weight:600; color:var(--gray-5); margin:14px 0 4px; }
+  .terms-box{ max-height:50vh; overflow-y:auto; border:1px solid var(--gray-2); border-radius:8px; padding:16px 18px; background:#fff; font-size:14px; line-height:1.7; color:var(--gray-6); }
+  .terms-box h4{ margin:0 0 8px; font-size:16px; color:var(--navy); }
+  .terms-box h5{ margin:16px 0 6px; font-size:14px; color:var(--navy); }
+  .terms-box ul{ margin:0; padding-inline-start:18px; }
+  .terms-box p{ margin:0; }
+  .terms-agree{ display:flex; gap:10px; align-items:flex-start; margin-top:14px; font-size:14px; line-height:1.6; cursor:pointer; }
+  .terms-agree input{ margin-top:3px; width:18px; height:18px; flex-shrink:0; }
+  .terms-agree input:disabled ~ span{ opacity:.55; }
+  .btn:disabled{ opacity:.5; cursor:not-allowed; }
+  .card[hidden]{ display:none; }
+  .pay-error{ color:#b42318; font-size:14px; margin:8px 0 0; }
+</style>
+<link rel="stylesheet" href="../assets/kamin-fields.css">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon-32.png">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<meta name="theme-color" content="#101B24">
+</head>
+<body>
+
+<nav class="nav">
+  <a class="word" href="/" data-home-link="1" style="display:inline-flex; text-decoration:none;"><img src="../assets/kamin-logo-mark.png" alt="Kamin" style="height:24px; width:auto; display:block;"></a>
+  <button class="langbtn" id="langToggle" type="button" onclick="toggleLang()">English</button>
+</nav>
+
+<div class="wrap">
+  <div id="formRoot">
+    <p class="kicker form-eyebrow" data-ar>كامن &middot; استوديو التطوير المهني، تأسس 2019</p>
+    <p class="kicker form-eyebrow" data-en>Kamin &middot; premium career advancement studio, est. 2019</p>
+    <h1 class="form-title" data-ar>قصة يستحقها من تحب</h1>
+    <h1 class="form-title" data-en>A Story Worth Gifting</h1>
+    <p class="lede" data-ar>نؤمن أن أجمل الهدايا هي التي تُحدث فرقًا حقيقيًا في مسيرة من نُحب. المدة المتوقعة: 1–3 دقائق.</p>
+    <p class="lede" data-en>We believe the most meaningful gifts are the ones that shape someone's future. Estimated time: 1–3 minutes.</p>
+
+    <div class="steps">
+      <div class="step-dot active" id="dot1"></div><div class="step-dot" id="dot2"></div>
+      <div class="step-dot" id="dot3"></div><div class="step-dot" id="dot4"></div>
+    </div>
+    <p class="step-label" id="stepLabel"><b data-ar>1 من 4</b><b data-en>1 of 4</b>: <span data-ar>بيانات المُهدي</span><span data-en>About the Gifter (You)</span></p>
+
+    <form id="giftForm" novalidate>
+  <p id="pricesError" class="err-msg" role="alert" style="display:none"><span data-en>Prices couldn't load. Refresh the page.</span><span data-ar>تعذّر تحميل الأسعار. حدّث الصفحة.</span></p>
+
+      <!-- ============ STEP 1 — ABOUT THE GIFTER ============ -->
+      <section class="panel active" data-step="1">
+        <div class="card">
+          <div id="senderFieldsGroup">
+            <div class="field" data-required><label class="flabel"><span data-ar>البريد الإلكتروني</span><span data-en>Email</span><span class="req">*</span></label>
+              <input type="email" name="email" required autocomplete="email" dir="ltr" spellcheck="false" autocapitalize="off"><div class="err-msg" data-ar>مطلوب</div><div class="err-msg" data-en>Required</div></div>
+            <div class="field" data-required><label class="flabel"><span data-ar>الاسم الكامل</span><span data-en>Full Name</span><span class="req">*</span></label>
+              <input type="text" name="fullName" required autocomplete="name"><div class="err-msg" data-ar>مطلوب</div><div class="err-msg" data-en>Required</div></div>
+            <div class="field" data-required><label class="flabel"><span data-ar>رقم الجوال</span><span data-en>Mobile Number</span><span class="req">*</span></label>
+              <input type="tel" name="mobile" dir="ltr" required inputmode="tel" autocomplete="tel"><div class="err-msg" data-ar>مطلوب</div><div class="err-msg" data-en>Required</div></div>
+
+            <div class="field" data-required id="prevClientField"><label class="flabel"><span data-ar>هل سبق لك شراء خدمة من كامن؟</span><span data-en>Have you previously purchased a service from Kamin?</span><span class="req">*</span></label>
+              <div class="opt-grid">
+                <label class="opt"><input type="radio" name="prevClient" value="returning" required> <span data-ar>نعم، أنا عميل سابق</span><span data-en>Yes, I'm a returning client</span></label>
+                <label class="opt"><input type="radio" name="prevClient" value="gifted"> <span data-ar>نعم، أهديت سابقًا</span><span data-en>Yes, I've gifted before</span></label>
+                <label class="opt"><input type="radio" name="prevClient" value="first"> <span data-ar>لا، هذه أول مرة</span><span data-en>No, this is my first time</span></label>
+              </div><div class="err-msg" data-ar>مطلوب</div><div class="err-msg" data-en>Required</div></div>
+
+          </div>
+
+        </div>
+        <div class="actions"><span></span>
+          <button type="button" class="btn btn-primary" onclick="goStep(2)"><span data-ar>التالي</span><span data-en>Next</span></button>
+        </div>
+      </section>
+
+      <!-- ============ STEP 2 — ABOUT THE RECIPIENT ============ -->
+      <section class="panel" data-step="2">
+        <div class="card">
+          <div class="field" data-required><label class="flabel"><span data-ar>الاسم الكامل للمُهدى إليه</span><span data-en>Recipient's Full Name</span><span class="req">*</span></label>
+            <input type="text" name="recipientName" required><div class="err-msg" data-ar>مطلوب</div><div class="err-msg" data-en>Required</div></div>
+          <div class="field"><label class="flabel"><span data-ar>البريد الإلكتروني للمُهدى إليه (اختياري)</span><span data-en>Recipient's Email (optional)</span></label>
+            <input type="email" name="recipientEmail" autocomplete="off" dir="ltr" spellcheck="false" autocapitalize="off"></div>
+          <div class="field" id="recipientEmailConfirmField"><label class="flabel"><span data-ar>أكّد البريد الإلكتروني للمُهدى إليه</span><span data-en>Confirm Recipient's Email</span></label>
+            <div class="hint" style="margin:0 0 8px"><span data-ar>اكتبه مرة ثانية لنتأكد من وصول الهدية لصاحبها. اتركه فارغًا إن لم تُدخل بريدًا</span><span data-en>Type it again so the gift reaches the right person. Leave blank if you didn't enter an email</span></div>
+            <input type="email" name="recipientEmailConfirm" data-match="recipientEmail" autocomplete="off" dir="ltr" spellcheck="false" autocapitalize="off"><div class="err-msg" data-ar>البريد غير مطابق</div><div class="err-msg" data-en>Emails don't match</div></div>
+          <div class="field" data-required><label class="flabel"><span data-ar>رقم جوال المُهدى إليه</span><span data-en>Recipient's Mobile Number</span><span class="req">*</span></label>
+            <div class="hint" style="margin:0 0 8px"><span data-ar>يُستخدم فقط للتواصل بخصوص تنفيذ الهدية</span><span data-en>Used only to coordinate delivery of the gift</span></div>
+            <input type="tel" name="recipientMobile" dir="ltr" required inputmode="tel" autocomplete="off"><div class="err-msg" data-ar>مطلوب</div><div class="err-msg" data-en>Required</div></div>
+          <div class="field" data-required><label class="flabel"><span data-ar>أكّد رقم جوال المُهدى إليه</span><span data-en>Confirm Recipient's Mobile Number</span><span class="req">*</span></label>
+            <input type="tel" name="recipientMobileConfirm" data-match="recipientMobile" dir="ltr" required inputmode="tel" autocomplete="off"><div class="err-msg" data-ar>مطلوب</div><div class="err-msg" data-en>Required</div></div>
+
+          <div class="field" data-required><label class="flabel"><span data-ar>طريقة الإهداء</span><span data-en>Gifting Mode</span><span class="req">*</span></label>
+            <div class="opt-grid">
+              <label class="opt"><input type="radio" name="giftMode" value="service" required onchange="onGiftModeChange()"> <span data-ar>أهدي خدمة محددة أو باقة</span><span data-en>Gift a specific service or a bundle</span></label>
+              <label class="opt"><input type="radio" name="giftMode" value="card" onchange="onGiftModeChange()"> <span data-ar>أهدي رصيدًا بقيمة مالية (بطاقة هدية)</span><span data-en>Gift a monetary value (Gift Card)</span></label>
+            </div><div class="err-msg" data-ar>مطلوب</div><div class="err-msg" data-en>Required</div></div>
+        </div>
+        <div class="actions">
+          <button type="button" class="btn btn-ghost" onclick="goStep(1)"><span data-ar>السابق</span><span data-en>Back</span></button>
+          <button type="button" class="btn btn-primary" onclick="goStep(3)"><span data-ar>التالي</span><span data-en>Next</span></button>
+        </div>
+      </section>
+
+      <!-- ============ STEP 3 — GIFT CARD or SERVICE/BUNDLE (branches) ============ -->
+      <section class="panel" data-step="3">
+        <!-- Gift Card branch — confirmed from the live form -->
+        <div class="subpanel" id="branchCard">
+          <div class="card">
+            <h3><span data-ar>اختر بطاقة الهدية</span><span data-en>Choose the Gift Card</span></h3>
+            <div class="field" data-required data-active-if="card"><label class="flabel"><span data-ar>بطاقة هدية بقيمة مالية</span><span data-en>Gift Card (Monetary Value)</span><span class="req">*</span></label>
+              <div class="hint" style="margin:0 0 8px"><span data-ar>يستخدمها المُهدى إليه على أي خدمة أو باقة يختارها</span><span data-en>Redeemable by the recipient on any service or bundle</span></div>
+              <div class="opt-grid">
+                <label class="opt"><input type="radio" name="cardAmount" value="500"> 500<span class="sar"></span></label>
+                <label class="opt"><input type="radio" name="cardAmount" value="1000"> 1,000<span class="sar"></span></label>
+                <label class="opt"><input type="radio" name="cardAmount" value="1500"> 1,500<span class="sar"></span></label>
+                <label class="opt"><input type="radio" name="cardAmount" value="2500"> 2,500<span class="sar"></span></label>
+                <label class="opt"><input type="radio" name="cardAmount" value="5000"> 5,000<span class="sar"></span></label>
+                <label class="opt"><input type="radio" name="cardAmount" value="custom"> <span data-ar>مبلغ مخصص (حدده في أخرى)</span><span data-en>Custom amount (specify in Other)</span></label>
+              </div>
+              <input type="text" name="cardAmountOther" placeholder="Other" data-placeholder-en="Other" data-placeholder-ar="أخرى" style="margin-top:10px" data-kind="amount" data-required-if="cardAmount=custom" inputmode="numeric" autocomplete="off">
+              <div class="err-msg" data-ar>مطلوب</div><div class="err-msg" data-en>Required</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Specific service/bundle branch — NOT independently re-confirmed, built to
+             match the New Client Form's tier/service pattern per the project notes.
+             Verify against the real form before treating this as final. -->
+        <div class="subpanel" id="branchService">
+          <div class="card">
+            <h3><span data-ar>اختر الخدمة أو الباقة المُهداة</span><span data-en>Choose the Gifted Service or Bundle</span></h3>
+            <div class="field" data-required id="giftTierField" data-active-if="service"><label class="flabel"><span data-ar>سنوات خبرة المُهدى إليه</span><span data-en>Recipient's Years of Experience</span><span class="req">*</span></label>
+              <div class="opt-grid">
+                <label class="opt"><input type="radio" name="giftTier" value="early"> <span data-ar>المهنيون الصاعدون (0–3 سنوات)</span><span data-en>Emerging Professional (0–3 yrs)</span></label>
+                <label class="opt"><input type="radio" name="giftTier" value="mid"> <span data-ar>المهنيون المتمرسون (3–7 سنوات)</span><span data-en>Experienced Professional (3–7 yrs)</span></label>
+                <label class="opt"><input type="radio" name="giftTier" value="senior"> <span data-ar>كبار المحترفين (7–15 سنة)</span><span data-en>Senior (7–15 yrs)</span></label>
+                <label class="opt"><input type="radio" name="giftTier" value="executive"> <span data-ar>القيادات التنفيذية (15+ سنة)</span><span data-en>Executive (15+ yrs)</span></label>
+              </div><div class="err-msg" data-ar>مطلوب</div><div class="err-msg" data-en>Required</div></div>
+            <div class="field" data-required data-active-if="service" data-group="giftService"><label class="flabel"><span data-ar>الخدمة المُهداة</span><span data-en>Gifted Service(s)</span><span class="req">*</span></label>
+              <div class="opt-grid">
+                <label class="opt"><input type="checkbox" name="giftService" value="resumeWriting"> <span data-ar>إعداد السيرة الذاتية</span><span data-en>Resume Writing</span> <span class="price-tag" data-price="resumeWriting"></span></label>
+                <label class="opt"><input type="checkbox" name="giftService" value="linkedinOpt"> <span data-ar>تطوير ملف لينكدإن</span><span data-en>LinkedIn Optimization</span> <span class="price-tag" data-price="linkedinOpt"></span></label>
+                <label class="opt"><input type="checkbox" name="giftService" value="portfolioDev"> <span data-ar>تطوير ملف الأعمال</span><span data-en>Portfolio Development</span> <span class="price-tag" data-price="portfolioDev"></span></label>
+                <label class="opt"><input type="checkbox" name="giftService" value="interview"> <span data-ar>تدريب مقابلات (60 د)</span><span data-en>Interview Coaching (60 min)</span> <span class="price-tag" data-flat-price="interview"></span></label>
+                <label class="opt"><input type="checkbox" name="giftService" value="career"> <span data-ar>إرشاد مهني (60 د)</span><span data-en>Career Coaching (60 min)</span> <span class="price-tag" data-flat-price="career"></span></label>
+                <label class="opt"><input type="checkbox" name="giftService" value="ats"> <span data-ar>خدمة أنظمة تتبّع المتقدمين (ATS)</span><span data-en>ATS Optimization</span> <span class="price-tag" data-flat-price="ats"></span></label>
+                <label class="opt"><input type="checkbox" name="giftService" value="coverletter"> <span data-ar>خطاب تعريفي</span><span data-en>Cover Letter Writing</span> <span class="price-tag" data-flat-price="coverletter"></span></label>
+                <label class="opt"><input type="checkbox" name="giftService" value="bio"> <span data-ar>نبذة شخصية</span><span data-en>Biography Writing</span> <span class="price-tag" data-flat-price="bio"></span></label>
+                <label class="opt"><input type="checkbox" name="giftService" value="translation"> <span data-ar>ترجمة السيرة الذاتية</span><span data-en>Resume Translation</span> <span class="price-tag" data-flat-price="translation"></span></label>
+              </div><div class="err-msg" data-ar>اختر خدمة واحدة على الأقل</div><div class="err-msg" data-en>Select at least one</div></div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="button" class="btn btn-ghost" onclick="goStep(2)"><span data-ar>السابق</span><span data-en>Back</span></button>
+          <button type="button" class="btn btn-primary" onclick="goStep(4)"><span data-ar>التالي</span><span data-en>Next</span></button>
+        </div>
+      </section>
+
+      <!-- ============ STEP 4 — GIFTING EXPERIENCE + POLICIES ============ -->
+      <section class="panel" data-step="4">
+        <div class="card">
+          <div class="field" data-required><label class="flabel"><span data-ar>طريقة تسليم الهدية</span><span data-en>How Should We Deliver the Gift?</span><span class="req">*</span></label>
+            <div class="opt-grid">
+              <label class="opt"><input type="radio" name="deliveryMethod" value="now" required onchange="toggleScheduled()"> <span data-ar>إشعار فوري: نُبلغ المُهدى إليه بمجرد تأكيد كامن لطلبك</span><span data-en>Notify Now: we contact the recipient once Kamin confirms your request</span></label>
+              <label class="opt"><input type="radio" name="deliveryMethod" value="scheduled" onchange="toggleScheduled()"> <span data-ar>جدولة التسليم: نُبلغه في تاريخ محدد</span><span data-en>Schedule Delivery: we notify on a specific date</span></label>
+            </div><div class="err-msg" data-ar>مطلوب</div><div class="err-msg" data-en>Required</div></div>
+
+          <div class="field" data-required id="scheduledDateField" style="display:none"><label class="flabel"><span data-ar>تاريخ التسليم</span><span data-en>Delivery date</span><span class="req">*</span></label>
+            <input type="date" name="scheduledDate" required data-min="today"><div class="err-msg" data-ar>مطلوب</div><div class="err-msg" data-en>Required</div></div>
+
+          <div class="field" data-required><label class="flabel"><span data-ar>المناسبة</span><span data-en>Occasion</span><span class="req">*</span></label>
+            <div class="opt-grid">
+              <label class="opt"><input type="radio" name="occasion" value="birthday" required> <span data-ar>عيد ميلاد</span><span data-en>Birthday</span></label>
+              <label class="opt"><input type="radio" name="occasion" value="graduation"> <span data-ar>تخرج</span><span data-en>Graduation</span></label>
+              <label class="opt"><input type="radio" name="occasion" value="promotion"> <span data-ar>ترقية/إنجاز مهني</span><span data-en>Promotion / Career Milestone</span></label>
+              <label class="opt"><input type="radio" name="occasion" value="wedding"> <span data-ar>زواج</span><span data-en>Wedding</span></label>
+              <label class="opt"><input type="radio" name="occasion" value="eid"> <span data-ar>عيد</span><span data-en>Eid</span></label>
+              <label class="opt"><input type="radio" name="occasion" value="national"> <span data-ar>يوم وطني</span><span data-en>National Day</span></label>
+              <label class="opt"><input type="radio" name="occasion" value="encouragement"> <span data-ar>دعم وتشجيع</span><span data-en>Encouragement &amp; Support</span></label>
+              <label class="opt"><input type="radio" name="occasion" value="thanks"> <span data-ar>شكر وتقدير</span><span data-en>Thank You / Appreciation</span></label>
+            </div>
+            <input type="text" name="occasionOther" placeholder="Other" data-placeholder-en="Other" data-placeholder-ar="أخرى" style="margin-top:10px">
+            <div class="err-msg" data-ar>مطلوب</div><div class="err-msg" data-en>Required</div></div>
+
+          <div class="field"><label class="flabel"><span data-ar>رسالتك الشخصية للمُهدى إليه (اختياري)</span><span data-en>Your Personal Message to the Recipient (optional)</span></label>
+            <div class="hint" style="margin:0 0 8px"><span data-ar>ستُطبع على شهادة الإهداء الرقمية (حتى 500 حرف)</span><span data-en>Printed on the digital gift certificate (up to 500 characters)</span></div>
+            <textarea name="personalMessage" maxlength="500"></textarea></div>
+
+          <div class="field" data-required><label class="flabel"><span data-ar>هل تريد إخفاء هويتك؟</span><span data-en>Would you like to remain anonymous?</span><span class="req">*</span></label>
+            <div class="opt-grid">
+              <label class="opt"><input type="radio" name="anonymous" value="no" required> <span data-ar>لا، أظهر اسمي</span><span data-en>No, show my name</span></label>
+              <label class="opt"><input type="radio" name="anonymous" value="yes"> <span data-ar>نعم، هدية مجهولة المصدر</span><span data-en>Yes, gift anonymously</span></label>
+            </div><div class="err-msg" data-ar>مطلوب</div><div class="err-msg" data-en>Required</div></div>
+
+          <div class="field" data-required id="membershipField"><label class="flabel"><span data-ar>هل ترغب بإضافة عضوية كامن السنوية كجزء من الهدية؟</span><span data-en>Add an annual Kamin Membership as part of the gift?</span><span class="req">*</span></label>
+            <div class="hint" style="margin:0 0 8px"><span data-ar>خصم 15% على جميع الخدمات، أولوية في الجدولة، مكالمة متابعة مجانية 15 دقيقة سنويًا</span><span data-en>15% off all services, priority scheduling, 1 free 15-minute annual check-in call</span></div>
+            <div class="opt-grid">
+              <label class="opt"><input type="radio" name="giftMembership" value="yes" required> <span data-ar>نعم، أضفها</span><span data-en>Yes, add it</span> <span class="price-tag"><span data-flat-price="membership"></span><span data-ar>/سنة</span><span data-en>/yr</span></span></label>
+              <label class="opt"><input type="radio" name="giftMembership" value="no"> <span class="decline"><span data-ar>لا، ليس الآن</span><span data-en>No, not now</span></span></label>
+            </div><div class="err-msg" data-ar>مطلوب</div><div class="err-msg" data-en>Required</div></div>
+        </div>
+
+        <div class="policy-card">
+          <h3 style="margin:0 0 10px;font-size:16px"><span data-ar>السياسات والشروط</span><span data-en>Policies &amp; Terms</span></h3>
+          <ul>
+            <li><b data-ar>صلاحية بطاقات الهدايا:</b><b data-en>Gift card validity:</b> <span data-ar>12 شهرًا من تاريخ الإصدار</span><span data-en>12 months from issue date</span></li>
+            <li><b data-ar>استبدال الخدمة:</b><b data-en>Service upgrade:</b> <span data-ar>يمكن للمُهدى إليه ترقية الخدمة بدفع الفرق</span><span data-en>Recipient can upgrade by paying the difference</span></li>
+            <li><b data-ar>عدم الاسترداد:</b><b data-en>Non-refundable:</b> <span data-ar>الهدايا غير قابلة للاسترداد النقدي، لكنها قابلة للتحويل لشخص آخر لمرة واحدة</span><span data-en>gifts are non-refundable but transferable once to another recipient</span></li>
+            <li><b data-ar>الخصوصية:</b><b data-en>Privacy:</b> <span data-ar>نحافظ على سرية بيانات المُهدي والمُهدى إليه.</span><span data-en>we keep gifter and recipient details private.</span> <a data-ar href="/?lang=ar#privacy">كيف نحافظ على خصوصية معلوماتك</a><a data-en href="/?lang=en#privacy">How we keep your information private</a></li>
+            <li><b data-ar>جولة تعديل واحدة</b><b data-en>1 round of edits</b> <span data-ar>مشمولة مع جميع الخدمات الكتابية</span><span data-en>included with all written services</span></li>
+          </ul>
+        </div>
+
+        <div class="card" id="giftTotalCard">
+          <div class="pay-row total"><span><span data-ar>الإجمالي التقديري</span><span data-en>Estimated total</span></span><span id="giftTotal"></span></div>
+        </div>
+        <div class="card" id="termsCard">
+          <h3><span data-ar>الشروط والأحكام</span><span data-en>Terms &amp; Conditions</span></h3>
+          <div class="terms-box" id="termsBox" tabindex="0" role="region" aria-label="Terms &amp; Conditions"></div>
+          <p class="hint" id="termsScrollHint" style="margin-top:10px"><span data-ar>مرّر إلى الأسفل للمتابعة</span><span data-en>Scroll to the bottom to continue</span></p>
+          <label class="terms-agree"><input type="checkbox" id="termsAgree" disabled onchange="checkTermsScrolled()"><span><span data-ar>قرأت الشروط والأحكام وأوافق عليها</span><span data-en>I have read and agree to the Terms &amp; Conditions</span></span></label>
+        </div>
+        <div class="actions">
+          <button type="button" class="btn btn-ghost" onclick="goStep(3)"><span data-ar>السابق</span><span data-en>Back</span></button>
+          <button type="submit" class="btn btn-primary" id="submitBtn"><span data-ar>إرسال</span><span data-en>Submit</span></button>
+        </div>
+        <div class="err-msg" id="submitError" style="display:none; text-align:center; margin-top:16px;">
+          <span data-ar>حدث خطأ أثناء الإرسال. حاول مرة أخرى.</span><span data-en>Something went wrong submitting the form. Please try again.</span>
+        </div>
+        <div class="err-msg" id="tooFastError" role="alert" style="display:none; text-align:center; margin-top:16px;">
+          <span data-ar>وصلنا طلبك أسرع من المعتاد. راجع بياناتك ثم اضغط إرسال مرة أخرى.</span><span data-en>That was quicker than we expected. Check your details, then press Submit again.</span>
+        </div>
+      </section>
+    </form>
+  </div>
+
+  <div class="done-screen" id="sentScreen" role="status">
+    <div class="ico">&#10003;</div>
+    <p><span data-ar>وصل طلبك إلى كامن، وسنتواصل معك قريبًا.</span><span data-en>Kamin has your request and will contact you soon.</span></p>
+    <a class="btn btn-primary done-btn" href="/" data-home-link="1"><span data-ar>العودة إلى الموقع</span><span data-en>Back to the website</span></a>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="../assets/kamin-supabase.js"></script>
+<script src="../assets/kamin-prices.js"></script>
+<script src="../assets/kamin-errors.js"></script>
+<script src="../assets/kamin-terms.js"></script>
+<script src="../assets/kamin-guard.js"></script>
+<script src="../assets/kamin-lang.js"></script>
+<script src="../assets/kamin-fields.js"></script>
+<script>
+  /* -------- prices: read from the database (public.price_list, pending 26)
+     at start. No hard-coded fallback: if the list can't load, the form
+     says so and refuses to submit. -------- */
+  var PRICES = {};
+  var FLAT_PRICES = {};
+  var MEMBERSHIP_PRICE = null;
+  var BUNDLES = [];
+  var priceState = 'loading'; // loading | ready | failed
+  function currentGiftTier(){ var t = document.querySelector('input[name="giftTier"]:checked'); return t ? t.value : null; }
+  function renderGiftTier(){
+    var tier = currentGiftTier();
+    document.querySelectorAll('.price-tag[data-price]').forEach(function(el){
+      var key = el.getAttribute('data-price');
+      el.innerHTML = (tier && PRICES[key] && PRICES[key][tier] != null) ? PRICES[key][tier].toLocaleString() + '<span class="sar"></span>' : '';
+    });
+  }
+  document.addEventListener('change', function(e){ if (e.target.name === 'giftTier') renderGiftTier(); if (e.target.name === 'giftService') syncTierRequired(); });
+  function showPricesError(){
+    var el = document.getElementById('pricesError');
+    if (el) el.style.display = 'block';
+    document.querySelectorAll('#giftForm button[type="submit"]').forEach(function(b){ b.disabled = true; });
+  }
+  function renderFlatPrices(){
+    document.querySelectorAll('[data-flat-price]').forEach(function(el){
+      var key = el.getAttribute('data-flat-price');
+      var amt = key === 'membership' ? MEMBERSHIP_PRICE : FLAT_PRICES[key];
+      el.innerHTML = amt != null ? amt.toLocaleString() + '<span class="sar"></span>' : '';
+    });
+  }
+  kaminPrices.load().then(function(p){
+    PRICES = p.services;
+    FLAT_PRICES = p.flat;
+    MEMBERSHIP_PRICE = p.membership;
+    BUNDLES = p.bundles || [];
+    priceState = 'ready';
+    renderFlatPrices();
+    renderGiftTier();
+  }).catch(function(err){
+    priceState = 'failed';
+    showPricesError();
+    if (window.console) console.error('price list failed to load', err);
+  });
+
+
+  function onGiftModeChange(){
+    // Runs on page load too, before any mode is picked.
+    var picked = document.querySelector('input[name="giftMode"]:checked');
+    var mode = picked ? picked.value : null;
+    document.getElementById('branchCard').classList.toggle('active', mode === 'card');
+    document.getElementById('branchService').classList.toggle('active', mode === 'service');
+    document.querySelectorAll('[data-active-if]').forEach(function(f){
+      f.style.display = (f.getAttribute('data-active-if') === mode) ? '' : 'none';
+    });
+  }
+  function toggleScheduled(){
+    var scheduled = document.querySelector('input[name="deliveryMethod"]:checked');
+    document.getElementById('scheduledDateField').style.display = (scheduled && scheduled.value === 'scheduled') ? '' : 'none';
+  }
+
+  var STEP_LABELS = {
+    1: { ar: 'بيانات المُهدي', en: 'About the Gifter (You)' },
+    2: { ar: 'بيانات المُهدى إليه', en: 'About the Recipient' },
+    3: { ar: 'اختيار الهدية', en: 'Choose the Gift' },
+    4: { ar: 'تجربة الإهداء', en: 'The Gifting Experience' }
+  };
+
+  // Required and format checks: ../assets/kamin-fields.js. Only visible
+  // fields count, so the inactive gift branch and a signed-in sender's
+  // hidden fields are skipped.
+  // The tier prices the three tiered services only; an add-on-only gift (say Resume Translation
+  // alone) doesn't need it, and the server ignores it then (decision 2026-10-18).
+  function syncTierRequired(){
+    var need = Array.from(document.querySelectorAll('input[name="giftService"]:checked')).some(function(el){ return GIFT_SERVICE_KEYS.indexOf(el.value) >= 0; });
+    var f = document.getElementById('giftTierField');
+    if (need) f.setAttribute('data-required', ''); else f.removeAttribute('data-required');
+    f.querySelector('.req').style.display = need ? '' : 'none';
+  }
+  function validateStep(n){
+    syncTierRequired();
+    return KaminFields.validatePanel(document.querySelector('.panel[data-step="' + n + '"]'));
+  }
+
+  function goStep(n){
+    var current = document.querySelector('.panel.active').getAttribute('data-step');
+    if (n > current && !validateStep(current)) return;
+    document.querySelectorAll('.panel').forEach(function(p){ p.classList.toggle('active', p.getAttribute('data-step') == n); });
+    [1,2,3,4].forEach(function(i){
+      document.getElementById('dot' + i).classList.toggle('active', i == n);
+      document.getElementById('dot' + i).classList.toggle('done', i < n);
+    });
+    document.getElementById('stepLabel').innerHTML =
+      '<b data-ar>' + n + ' من 4</b><b data-en>' + n + ' of 4</b>: <span data-ar>' + STEP_LABELS[n].ar + '</span><span data-en>' + STEP_LABELS[n].en + '</span>';
+    applyLang(document.documentElement.lang);
+    if (n == 3) onGiftModeChange();
+    if (n == 4){ renderGiftTotal(); renderPayStep(); }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  /* -------- Terms, copied from returning-client-form.html (2026-10-18). A gift always
+     has a price, so the Terms always show. No payment step (2026-11-23). -------- */
+  var paySending = false, termsScrolled = false;
+
+  function needsPayment(){ return true; }
+  function renderPayStep(){
+    var pay = needsPayment();
+    document.getElementById('termsCard').hidden = !pay;
+    if (pay){ renderTerms(); checkTermsScrolled(); }
+    updatePayButton();
+  }
+  function renderTerms(){
+    var box = document.getElementById('termsBox');
+    if (!box || box.childElementCount || !window.KAMIN_TERMS) return;
+    ['en', 'ar'].forEach(function(l){
+      var t = window.KAMIN_TERMS[l];
+      var wrap = document.createElement('div');
+      wrap.setAttribute('data-' + l, '');
+      function add(parent, tag, text){ var el = document.createElement(tag); el.textContent = text; parent.appendChild(el); return el; }
+      add(wrap, 'h4', t.title);
+      t.sections.forEach(function(sec){
+        add(wrap, 'h5', sec.heading);
+        var ul = add(wrap, 'ul', '');
+        sec.items.forEach(function(it){ add(ul, 'li', it); });
+      });
+      add(wrap, 'h5', t.confidentialityTitle);
+      add(wrap, 'p', t.confidentialityBody);
+      box.appendChild(wrap);
+    });
+    box.addEventListener('scroll', checkTermsScrolled, { passive: true });
+  }
+  function checkTermsScrolled(){
+    var box = document.getElementById('termsBox');
+    if (box.scrollTop + box.clientHeight >= box.scrollHeight - 4) termsScrolled = true;
+    var agree = document.getElementById('termsAgree');
+    agree.disabled = !termsScrolled;
+    if (!termsScrolled) agree.checked = false;
+    document.getElementById('termsScrollHint').style.display = termsScrolled ? 'none' : '';
+    updatePayButton();
+  }
+  // Hold mode: no payment step; Submit needs only the Terms.
+  function payReady(){
+    return priceState === 'ready' && document.getElementById('termsAgree').checked;
+  }
+  function updatePayButton(){
+    document.getElementById('submitBtn').disabled = paySending || !payReady();
+  }
+
+  function val(name){
+    var el = document.querySelector('[name="' + name + '"]:checked') || document.querySelector('[name="' + name + '"]:not([type=radio]):not([type=checkbox])');
+    return el ? String(el.value || '').trim() : '';
+  }
+
+  // Gift choices as price_list keys (the paying form sent these to the order RPC). Coaching is the flat "career" item.
+  var GIFT_SERVICE_KEYS = ['resumeWriting', 'linkedinOpt', 'portfolioDev']; // tiered; every other item is a flat add-on
+  function giftChoices(){
+    var picked = Array.from(document.querySelectorAll('input[name="giftService"]:checked')).map(function(el){ return el.value; });
+    return {
+      tier: currentGiftTier(),
+      services: picked.filter(function(v){ return GIFT_SERVICE_KEYS.indexOf(v) >= 0; }),
+      addons: picked.filter(function(v){ return GIFT_SERVICE_KEYS.indexOf(v) < 0; }),
+      delivery: 'standard',
+      membership: val('giftMembership') === 'yes'
+    };
+  }
+  function cardAmount(){
+    var raw = val('cardAmount') === 'custom' ? val('cardAmountOther') : val('cardAmount');
+    var n = Number(String(raw).replace(/[,\s]/g, ''));
+    return raw && isFinite(n) ? n : null;
+  }
+
+  // Estimated total: display only. The server prices the order for real (quote_order,
+  // p_returning false, no referral, standard delivery); backend/test/46-gift-total-parity runs
+  // giftQuoteTotal against it over a grid, so keep it pure (choices + prices in, SAR out).
+  // GIFT_QUOTE_START
+  function giftQuoteTotal(c, P){
+    var amts = [];
+    c.services.forEach(function(k){ if (c.tier && P.services[k] && P.services[k][c.tier] != null) amts.push(P.services[k][c.tier]); });
+    c.addons.forEach(function(k){ if (P.flat[k] != null) amts.push(P.flat[k]); });
+    var subtotal = amts.reduce(function(t, a){ return t + a; }, 0);
+    var bundle = null;
+    P.bundles.forEach(function(b){ if (amts.length >= b.minServices) bundle = b; });
+    var pct = amts.length && bundle ? bundle.percent : 0;
+    var discount = Math.round(subtotal * pct) / 100;
+    return Math.round((subtotal - discount + (c.membership ? P.membership : 0)) * 100) / 100;
+  }
+  // GIFT_QUOTE_END
+  function giftTotal(){
+    if (val('giftMode') === 'card') return cardAmount();
+    return giftQuoteTotal(giftChoices(), { services: PRICES, flat: FLAT_PRICES, membership: MEMBERSHIP_PRICE, bundles: BUNDLES });
+  }
+  function renderGiftTotal(){
+    var el = document.getElementById('giftTotal');
+    var t = priceState === 'ready' ? giftTotal() : null;
+    el.innerHTML = t != null ? t.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' <span class="sar"></span>' : '';
+  }
+  document.addEventListener('change', function(){ if (document.querySelector('.panel.active[data-step="4"]')) renderGiftTotal(); });
+
+  /* -------- hold mode (2026-11-23): the gift form is only a form --------
+     No order, account or file of any kind. On Submit the answers become ONE plain-text
+     summary (English labels, the buyer's values as typed, "Estimated total: X SAR",
+     the form language) and ONE row goes into contact_messages (anon may
+     insert, not read, so no .select()); its trigger emails Kamin. Same pattern as
+     new-client-form.html; reverting the hold-mode commit restores the paying form. */
+  var HOLD_MAX = 5000;
+  var HOLD_MARK = ' [shortened]';
+  function holdClean(s){ return String(s || '').replace(/\s+/g, ' ').trim(); }
+  function holdLabel(field){
+    var el = field.querySelector('.flabel [data-en]');
+    return el ? holdClean(el.textContent) : '';
+  }
+  function holdOptionText(input){
+    var lab = input.closest('label');
+    var en = lab && lab.querySelector('[data-en]');
+    return en ? holdClean(en.textContent) : holdClean(lab ? lab.textContent : input.value);
+  }
+  function holdFieldValue(field){
+    var vals = [];
+    field.querySelectorAll('input[name], select[name], textarea[name]').forEach(function(c){
+      if (c.type === 'radio' || c.type === 'checkbox'){ if (c.checked && c.value !== 'custom') vals.push(holdOptionText(c)); return; }
+      var v = String(c.value || '').trim();
+      if (v) vals.push(v);
+    });
+    return vals.join(', ');
+  }
+  function holdTotal(){ return holdClean(document.getElementById('giftTotal').textContent); }
+  // Answers in form order. Free-text answers are the only ones ever shortened, longest first, each marked.
+  function buildHoldSummary(form){
+    var answers = [];
+    form.querySelectorAll('.panel .field').forEach(function(f){
+      if (f.closest('[hidden]') || f.style.display === 'none' || f.closest('.subpanel:not(.active)')) return;
+      var label = holdLabel(f), value = holdFieldValue(f);
+      if (label && value) answers.push({ label: label, value: value, full: value, free: !!f.querySelector('textarea, input[type="text"]') });
+    });
+    var tail = ['Estimated total: ' + holdTotal() + ' SAR', 'Form language: ' + (document.documentElement.lang === 'ar' ? 'Arabic' : 'English')];
+    function text(){ return ['Gift form'].concat(answers.map(function(a){ return a.label + ': ' + a.value; }), tail).join('\n'); }
+    var t = text();
+    var guard = 0;
+    while (t.length > HOLD_MAX && guard++ < 50){
+      var longest = answers.filter(function(a){ return a.free; }).sort(function(a, b){ return b.value.length - a.value.length; })[0];
+      if (!longest || longest.value.length <= HOLD_MARK.length + 20) break;
+      var keep = Math.max(20, longest.value.length - HOLD_MARK.length - (t.length - HOLD_MAX));
+      longest.value = longest.full.slice(0, keep).trim() + HOLD_MARK;
+      t = text();
+    }
+    return t.slice(0, HOLD_MAX);
+  }
+  function holdRow(form){
+    var fd = new FormData(form);
+    var cut = function(v, n){ return String(v || '').trim().slice(0, n); };
+    return {
+      name: cut(fd.get('fullName'), 200),
+      email: cut(fd.get('email'), 320),
+      phone: cut(fd.get('mobile'), 40) || null,
+      reason: 'Gift form',
+      message: buildHoldSummary(form),
+      lang: document.documentElement.lang === 'ar' ? 'ar' : 'en'
+    };
+  }
+
+  var giftGuard = kaminFormGuard(document.getElementById('giftForm'));
+
+  function showSentScreen(){
+    document.getElementById('formRoot').style.display = 'none';
+    document.getElementById('sentScreen').classList.add('active');
+    window.scrollTo({ top: 0 });
+  }
+
+  document.getElementById('giftForm').addEventListener('submit', async function(e){
+    e.preventDefault();
+    if (paySending) return;
+    if (priceState !== 'ready'){ showPricesError(); return; }
+    if (!validateStep(4)) return;
+    if (!payReady()){ checkTermsScrolled(); return; }
+    var form = document.getElementById('giftForm');
+    var submitBtn = document.getElementById('submitBtn');
+    var errEl = document.getElementById('submitError');
+    var fastEl = document.getElementById('tooFastError');
+    errEl.style.display = 'none';
+    fastEl.style.display = 'none';
+    var verdict = giftGuard.verdict();
+    if (verdict === 'too-fast'){ fastEl.style.display = 'block'; return; }
+    if (verdict === 'bot'){ showSentScreen(); return; }
+    paySending = true;
+    submitBtn.disabled = true;
+    try {
+      var res = await window.kaminPublicSupabase().from('contact_messages').insert(holdRow(form));
+      if (res.error) throw res.error;
+      showSentScreen();
+    } catch (err){
+      console.error('Kamin gift-form submit failed:', err);
+      if (window.kaminReportError) window.kaminReportError('gift-submit', err);
+      errEl.style.display = 'block';
+    } finally {
+      paySending = false;
+      updatePayButton();
+    }
+  });
+
+  function applyLang(lang){
+    document.documentElement.lang = lang;
+    document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+    document.getElementById('langToggle').textContent = lang === 'ar' ? 'English' : 'العربية';
+    if (window.kaminLangOnly) window.kaminLangOnly(lang);
+  }
+  function toggleLang(){ applyLang(document.documentElement.lang === 'ar' ? 'en' : 'ar'); kaminRememberLang(document.documentElement.lang); }
+
+  applyLang(kaminStartLang('ar')); onGiftModeChange(); toggleScheduled();
+  KaminFields.watch(document.getElementById('giftForm'));
+</script>
+</body>
+</html>

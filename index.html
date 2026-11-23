@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kamin</title>
+<meta name="description" content="A premium career advancement studio for the Gulf. We surface your hidden story and give it the language, structure, and authority to open the next door. استوديو رائد للتطوير المهني في الخليج. نُبرز قصتك الكامنة، ونمنحها اللغة، والبنية، والحضور الذي يفتح أمامك أبواب فرصتك القادمة.">
+<meta property="og:title" content="Kamin | Career Advancement Studio">
+<meta property="og:description" content="A premium career advancement studio for the Gulf. We surface your hidden story and give it the language, structure, and authority to open the next door. استوديو رائد للتطوير المهني في الخليج. نُبرز قصتك الكامنة، ونمنحها اللغة، والبنية، والحضور الذي يفتح أمامك أبواب فرصتك القادمة.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Kamin">
+<!--
+  Root of kamin-dashboard (2026-09-26). Supabase's email links fall back to
+  the project's Site URL, which is this bare root; there was no page here,
+  so confirmation links 404'd. Auth links (a hash or query carrying
+  access_token, type=, token_hash, code= or error) forward to the login page
+  keeping the query and hash, which supabase-js on login.html turns into a
+  session; password-recovery links go to reset-password.html.
+  Everyone else (2026-09-28, client approved the site) goes to the marketing
+  site. The query goes along too (2026-11-23): the forms link to
+  /?lang=<en|ar>#privacy, and the site reads ?lang. This is a client-side redirect, not a vercel.json rewrite: a rewrite
+  can't see the #hash, and the site's relative refs (support.js,
+  image-slot.js, kamin-map.html, assets/team-*.png) only resolve under
+  /website/.
+-->
+<script>
+  (function () {
+    var hash = location.hash || '';
+    var auth = /(^|[#?&])(access_token|refresh_token|type|token_hash|code|error|error_code|error_description)=/;
+    if (!auth.test(hash) && !auth.test(location.search || '')) {
+      location.replace('/website/kamin-website.dc.html' + (location.search || '') + hash);
+      return;
+    }
+    // type=recovery can arrive in the hash (implicit flow) or the query
+    // (token_hash template); either way it must reach the reset page.
+    var recovery = /(^|[#?&])type=recovery(&|$)/;
+    var page = recovery.test(hash) || recovery.test(location.search || '') ? 'reset-password.html' : 'login.html';
+    location.replace('/dashboard/' + page + location.search + hash);
+  })();
+</script>
+<style>
+  body{ margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center; background:#101B24; color:#FCFAF6; font-family:system-ui, sans-serif; }
+  a{ color:#E3C88A; }
+</style>
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon-32.png">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<meta name="theme-color" content="#101B24">
+</head>
+<body>
+  <p><a href="/website/kamin-website.dc.html">Kamin</a> · <a href="/dashboard/login.html">Continue to Kamin log in</a> · <a href="/dashboard/login.html" lang="ar">تسجيل الدخول إلى كامن</a></p>
+</body>
+</html>

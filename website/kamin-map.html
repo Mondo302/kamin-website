@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="https://unpkg.com/d3@7.9.0/dist/d3.min.js" integrity="sha384-CjloA8y00+1SDAUkjs099PVfnY2KmDC2BZnws9kh8D/lX1s46w6EPhpXdqMfjK6i" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/topojson-client@3.1.0/dist/topojson-client.min.js" integrity="sha384-Ukv1p/xTma6P4/2bY5KzWBw+ydSpXmhCMtyciIQVDJ1RmOxtCYNMF1uXT9T63H67" crossorigin="anonymous"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Jost:wght@300;400;500;600&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; background: #101B24; overflow: hidden; }
+  #wrap { position: relative; width: 100%; }
+  svg { display: block; width: 100%; height: auto; }
+  #tip {
+    position: absolute; pointer-events: none; opacity: 0;
+    background: #F6F1E9; color: #16232E; font-size: 12px; font-weight: 500;
+    padding: 6px 11px; line-height: 1.55; text-align: center; transform: translate(-50%, -118%);
+    transition: opacity .12s ease; border-radius: 2px;
+  }
+  #tip.en { font-family: 'Jost', 'IBM Plex Sans Arabic', sans-serif; }
+</style>
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon-32.png">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<meta name="theme-color" content="#101B24">
+</head>
+<body>
+<div id="wrap"><div id="tip"></div></div>
+<script>
+var LOCATIONS = [
+  { en: 'Riyadh',        ar: 'الرياض',          lat: 24.7136, lon: 46.6753 },
+  { en: 'Jeddah',        ar: 'جدة',             lat: 21.4858, lon: 39.1925 },
+  { en: 'Makkah',        ar: 'مكة المكرمة',     lat: 21.3891, lon: 39.8579 },
+  { en: 'Madinah',       ar: 'المدينة المنورة', lat: 24.5247, lon: 39.5692 },
+  { en: 'Dammam',        ar: 'الدمام',          lat: 26.4207, lon: 50.0888 },
+  { en: 'Al Khobar',     ar: 'الخبر',           lat: 26.2794, lon: 50.2083 },
+  { en: 'Dhahran',       ar: 'الظهران',         lat: 26.2361, lon: 50.0393 },
+  { en: 'Jubail',        ar: 'الجبيل',          lat: 27.0174, lon: 49.6225 },
+  { en: 'Al Ahsa',       ar: 'الأحساء',         lat: 25.3833, lon: 49.5833 },
+  { en: 'Al Hofuf',      ar: 'الهفوف',          lat: 25.3647, lon: 49.5878 },
+  { en: 'Al Mubarraz',   ar: 'المبرز',          lat: 25.4106, lon: 49.5647 },
+  { en: 'Taif',          ar: 'الطائف',          lat: 21.2703, lon: 40.4158 },
+  { en: 'Al Jumum',      ar: 'الجموم',          lat: 21.6167, lon: 39.7000 },
+  { en: 'Thuwal',        ar: 'ثول',             lat: 22.2833, lon: 39.1000 },
+  { en: 'Yanbu',         ar: 'ينبع',            lat: 24.0895, lon: 38.0618 },
+  { en: 'Al Qunfudhah',  ar: 'القنفذة',         lat: 19.1264, lon: 41.0789 },
+  { en: 'Jazan',         ar: 'جازان',           lat: 16.8892, lon: 42.5511 },
+  { en: 'Abha',          ar: 'أبها',            lat: 18.2164, lon: 42.5053 },
+  { en: 'Najran',        ar: 'نجران',           lat: 17.4917, lon: 44.1322 },
+  { en: 'Al Kharj',      ar: 'الخرج',           lat: 24.1554, lon: 47.3346 },
+  { en: 'Al Qassim',     ar: 'القصيم',          lat: 26.3260, lon: 43.9750 },
+  { en: 'Unayzah',       ar: 'عنيزة',           lat: 26.0843, lon: 43.9940 },
+  { en: 'Ar Rass',       ar: 'الرس',            lat: 25.8697, lon: 43.4972 },
+  { en: 'Hail',          ar: 'حائل',            lat: 27.5114, lon: 41.7208 },
+  { en: 'Tabuk',         ar: 'تبوك',            lat: 28.3835, lon: 36.5662 },
+  { en: 'NEOM',          ar: 'نيوم',            lat: 27.9500, lon: 35.2500 },
+  { en: 'Dubai',         ar: 'دبي',             lat: 25.2048, lon: 55.2708 },
+  { en: 'Abu Dhabi',     ar: 'أبوظبي',          lat: 24.4539, lon: 54.3773 },
+  { en: 'Cairo',         ar: 'القاهرة',         lat: 30.0444, lon: 31.2357 },
+  { en: 'Tunis',         ar: 'تونس',            lat: 36.8065, lon: 10.1815 },
+  { en: 'Istanbul',      ar: 'إسطنبول',         lat: 41.0082, lon: 28.9784 },
+  { en: 'London',        ar: 'لندن',            lat: 51.5074, lon: -0.1278 },
+  { en: 'Paris',         ar: 'باريس',           lat: 48.8566, lon: 2.3522 },
+  { en: 'Frankfurt',     ar: 'فرانكفورت',       lat: 50.1109, lon: 8.6821 },
+  { en: 'Chambéry',      ar: 'شامبيري',         lat: 45.5646, lon: 5.9178 },
+  { en: 'New York City', ar: 'نيويورك',         lat: 40.7128, lon: -74.0060 },
+  { en: 'Toronto',       ar: 'تورونتو',         lat: 43.6532, lon: -79.3832 }
+];
+
+var GOLD = '#C6A15E', GOLD_LIGHT = '#DCC08A', NAVY = '#101B24';
+
+var W = 1000, H = 500;
+var svg = d3.select('#wrap').insert('svg', '#tip')
+  .attr('viewBox', '0 0 ' + W + ' ' + H)
+  .attr('preserveAspectRatio', 'xMidYMid meet');
+var tip = document.getElementById('tip');
+tip.className = 'en';
+
+// whole world, rotated so the Gulf sits near centre and the polar caps crop away
+var projection = d3.geoNaturalEarth1()
+  .rotate([-14, 0])
+  .scale(210)
+  .translate([W / 2, H / 2 + 58]);
+var path = d3.geoPath(projection);
+
+// merge cities whose plotted positions collide, so every dot is reachable
+var CLUSTER_PX = 7;
+var clusters = [];
+LOCATIONS.forEach(function (d) {
+  var p = projection([d.lon, d.lat]);
+  var hit = clusters.find(function (c) {
+    return Math.hypot(c.x - p[0], c.y - p[1]) < CLUSTER_PX;
+  });
+  if (hit) { hit.items.push(d); return; }
+  clusters.push({ x: p[0], y: p[1], items: [d] });
+});
+
+d3.json('https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-110m.json').then(function (topology) {
+  var countries = topojson.feature(topology, topology.objects.countries);
+
+  svg.append('g').selectAll('path').data(countries.features).join('path')
+    .attr('d', path)
+    .attr('fill', 'rgba(198,161,94,0.20)')
+    .attr('stroke', 'rgba(198,161,94,0.52)')
+    .attr('stroke-width', 0.75);
+
+  var pts = svg.append('g');
+  var dots = pts.selectAll('g').data(clusters).join('g')
+    .attr('transform', function (c) { return 'translate(' + c.x + ',' + c.y + ')'; })
+    .style('cursor', 'pointer');
+
+  dots.append('circle')
+    .attr('r', function (c) { return c.items.length > 1 ? 8.5 : 7; })
+    .attr('fill', GOLD)
+    .attr('opacity', 0.2);
+
+  dots.append('circle')
+    .attr('r', function (c) { return c.items.length > 1 ? 3.4 : 2.5; })
+    .attr('fill', GOLD_LIGHT)
+    .attr('stroke', NAVY)
+    .attr('stroke-width', 0.8);
+
+  dots.append('circle').attr('r', CLUSTER_PX - 1).attr('fill', 'transparent')
+    .on('mouseenter', function (event, c) {
+      var box = svg.node().getBoundingClientRect();
+      tip.innerHTML = c.items.map(function (d) {
+        return '<span style="white-space:nowrap">' + d.ar + '&nbsp;&nbsp;·&nbsp;&nbsp;' + d.en + '</span>';
+      }).join('<br>');
+      tip.style.left = (c.x / W * box.width) + 'px';
+      tip.style.top = (c.y / H * box.height) + 'px';
+      tip.style.opacity = 1;
+    })
+    .on('mouseleave', function () { tip.style.opacity = 0; });
+
+});
+</script>
+</body>
+</html>
